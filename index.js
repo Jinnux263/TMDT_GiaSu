@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('./src/database/conn');
+require('./src/database/db-connection');
 const expressFileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const express = require('express');
