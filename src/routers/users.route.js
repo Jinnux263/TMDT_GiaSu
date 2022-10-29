@@ -3,12 +3,6 @@ const router = express.Router();
 const usersController = require('../controllers/users.controller');
 const auth = require('../middlewares/auth');
 
-// router.post('/register', usersController.register);
-
-// router.post('/login', usersController.login);
-
-// router.get('/logout', usersController.logout);
-
 // router.get('/infor', auth, usersController.infor);
 
 // router.patch('/infor/:id', auth, usersController.updateUser);

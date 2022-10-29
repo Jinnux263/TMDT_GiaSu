@@ -22,6 +22,7 @@ app.use(
 app.get('/', function (req, res) {
   res.send(`Server is running at ${HOST}:${PORT}`);
 });
+app.use('/', require('./src/routers/auth.route'));
 app.use('/user', require('./src/routers/users.route'));
 app.use('/api', require('./src/routers/category.route'));
 app.use('/api', require('./src/routers/products.route'));
