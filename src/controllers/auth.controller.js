@@ -1,7 +1,8 @@
 const Users = require('../models/users.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const constants = require('../config/constants');
+const Key = constants.Key;
 class authController {
   async register(req, res) {
     res.send('Registerd');
@@ -12,6 +13,7 @@ class authController {
       var user = await Users.findOne({
         email,
       });
+
       if (!user)
         return res
           .status(500)
@@ -29,6 +31,14 @@ class authController {
         email: user.email,
         password: password,
       });
+      // const accessToken = await createAccessToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
+      // const refreshToken = createRefreshToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
 
       res.cookie('refreshtoken', refreshToken, {
         path: '/user/refresh_token',
@@ -41,7 +51,7 @@ class authController {
     }
   }
 }
-function createAccessToken(user) {
+async function createAccessToken(user) {
   return jwt.sign(user, Key, { expiresIn: '1d' });
 }
 function createRefreshToken(user) {
