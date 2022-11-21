@@ -31,14 +31,6 @@ class authController {
         email: user.email,
         password: password,
       });
-      // const accessToken = await createAccessToken({
-      //   email: 'tandat2603',
-      //   password: 'password',
-      // });
-      // const refreshToken = createRefreshToken({
-      //   email: 'tandat2603',
-      //   password: 'password',
-      // });
 
       res.cookie('refreshtoken', refreshToken, {
         path: '/user/refresh_token',

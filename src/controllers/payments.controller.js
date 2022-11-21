@@ -1,7 +1,15 @@
-class PaymentsController {
-  async getPayments(req, res) {}
+const PAYMENT_TYPE = {
+  MOMO: 'momo',
+};
 
-  async makePayment(req, res) {}
+class PaymentsController {
+  async getPayments(req, res) {
+    res.send('OK');
+  }
+
+  async makePayment(req, res) {
+    res.send('OK');
+  }
 }
 
 module.exports = new PaymentsController();

@@ -4,8 +4,8 @@ const auth = require('../middlewares/auth');
 const authAdmin = require('../middlewares/authAdmin');
 const Router = express.Router();
 
-// Router.route('/payment')
-//     .get(auth, authAdmin, paymentsController.getPayments)
-//     .post(auth, paymentsController.createPayment);
+Router.route('/payment')
+  .get(auth, authAdmin, paymentsController.getPayments)
+  .post(auth, paymentsController.makePayment);
 
 module.exports = Router;
