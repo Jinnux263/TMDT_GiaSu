@@ -1,4 +1,4 @@
-export const PaymentDTO = (
+const PaymentDTO = (
   user_id,
   name,
   email,
@@ -6,14 +6,14 @@ export const PaymentDTO = (
   address,
   cart,
   status,
-) => {
-  return {
-    user_id,
-    name,
-    email,
-    paymentID,
-    address,
-    cart,
-    status,
-  };
-};
+) => ({
+  user_id,
+  name,
+  email,
+  paymentID,
+  address,
+  cart,
+  status,
+});
+
+module.exports = PaymentDTO;
