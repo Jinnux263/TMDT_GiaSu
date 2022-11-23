@@ -1,4 +1,5 @@
 const axios = require('axios');
+// const Payment = require('../models/payments.model');
 
 const MOMO_CONFIG = {
   PARTNER_CODE: 'momo',
@@ -96,6 +97,7 @@ class MomoPayment extends PaymentStrategy {
   }
 
   async getPayments(req, res) {
+    // Todo: Get all từ hệ thống
     res.send('OK');
   }
 

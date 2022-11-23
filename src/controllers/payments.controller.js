@@ -1,34 +1,71 @@
 const MomoPayment = require('../service/payment.service');
-
-const PAYMENT_TYPE = {
-  MOMO: 'momo',
-};
+const User = require('../models/users.model');
+const Payment = require('../models/payments.model');
+const PaymentDTO = require('../dto/payment.dto');
 
 class PaymentsController {
-  paymentStrategy = MomoPayment;
+  // paymentStrategy = MomoPayment;
 
   async makePayment(req, res) {
-    MomoPayment.makePayment(req, res);
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(400).json({ msg: 'User not found' });
+    }
+    try {
+      const newTransaction = Payment.create(
+        PaymentDTO(),
+        //Todo: parameter cho paymentDTO o day
+      );
+      res.status(400).json(newTransaction);
+    } catch (err) {
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
+    // MomoPayment.makePayment(req, res);
   }
 
   async getPayments(req, res) {
-    this.paymentStrategy.getPayments(req, res);
+    try {
+      const transactions = await Payment.findById(req.params.id).exec();
+      res.status(200).json(transactions);
+    } catch (err) {
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
   }
 
   async getPaymentsOfUser(req, res) {
-    this.paymentStrategy.getPaymentsOfUser(req, res);
+    try {
+      const transactions = await Payment.findById(req.params.id).exec();
+      res.status(200).json(transactions);
+    } catch (err) {
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
   }
 
   async getPaymentById(req, res) {
-    this.paymentStrategy.getPaymentById(req, res);
+    try {
+      const transaction = await Payment.findById(req.params.id).exec();
+      res.status(200).json(transaction);
+    } catch (err) {
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
   }
 
   // async updatePaymentById(req, res) {
-  //   res.send('OK');
+  //   try {
+  //     const transaction = await Payment.findById(req.params.id).exec();
+  //     res.status(200).json(transaction);
+  //   } catch (err) {
+  //     res.status(500).json({ msg: 'Internal Server Error' });
+  //   }
   // }
 
   // async deletePaymentById(req, res) {
-  //   res.send('OK');
+  //   try {
+  //     const transaction = await Payment.findById(req.params.id).exec();
+  //     res.status(200).json(transaction);
+  //   } catch (err) {
+  //     res.status(500).json({ msg: 'Internal Server Error' });
+  //   }
   // }
 }
 
