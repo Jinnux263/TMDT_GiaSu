@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 const customersModel = require('./customers.model');
 const usersModel = require('./users.model');
-const customerScheme = new mongoose.Schema(
+const tutorSchema = new mongoose.Schema(
     {
-        user: {
-            type: usersModel,
-            unique: true,
-            required: true,
+        _id: {
+            type: String,
+            ref: "Users"
         },
         degree: String,
         grade: Number,
@@ -36,4 +35,4 @@ const customerScheme = new mongoose.Schema(
     },
 );
 
-module.exports = mongoose.model('Tutor', customerScheme);
+module.exports = mongoose.model('Tutors', tutorSchema);

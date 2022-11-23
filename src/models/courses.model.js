@@ -2,24 +2,26 @@
 const mongoose = require('mongoose');
 const subjectsModel = require('./subjects.model');
 const tutorsModel = require('./tutors.model');
-
+reqString = {
+    type: String,
+    required: true
+}
+reqNumber = {
+    type: Number,
+    required: true
+}
 const courseSchema = new mongoose.Schema(
     {
         subjects: [subjectsModel
         ],
-        grade: String,
-        description: String,
-        salary: Number,
-        numberOfStudent: Number,
+        grade: reqString,
+        description: reqString,
+        salary: reqNumber,
+        numberOfStudent: reqNumber,
         startDate: Date,
         endDate: Date,
         deadline: Date,
-        tutors: [
-            {
-                tutor: tutorsModel,
-                status: String,
-                lastModifiedDate: Date
-            }
+        tutors: [tutorSchema
         ]
     }
 );

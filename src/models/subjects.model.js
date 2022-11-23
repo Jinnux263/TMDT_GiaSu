@@ -1,6 +1,9 @@
 
 const mongoose = require('mongoose');
-
+const reqString = {
+    type: String,
+    required: true
+}
 const subjectSchema = new mongoose.Schema(
     {
         subjects: [
