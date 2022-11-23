@@ -5,7 +5,11 @@ const Payments = require('../models/payments.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-class AuthController {
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const constants = require('../config/constants');
+const Key = constants.Key;
+class authController {
   async register(req, res) {
     const user = new Users(req.body);
     // res.redirect('/login')
@@ -38,11 +42,52 @@ class AuthController {
       } else res.status(500).jsonp({ error: 'message' });
     });
   }
+
   async login(req, res) {
-    res.send('Logined');
+    try {
+      const { email, password } = req.body;
+      var user = await Users.findOne({
+        email,
+      });
+
+      if (!user)
+        return res
+          .status(500)
+          .json({ err: err.messages, error: 'User has not been registered' });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        return res.status(400).json({ msg: 'Authentification failed' });
+
+      const accessToken = createAccessToken({
+        email: user.email,
+        password: password,
+      });
+      const refreshToken = createRefreshToken({
+        email: user.email,
+        password: password,
+      });
+      // const accessToken = await createAccessToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
+      // const refreshToken = createRefreshToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
+
+      res.cookie('refreshtoken', refreshToken, {
+        path: '/user/refresh_token',
+        httpOnly: true,
+      });
+
+      res.json({ accessToken });
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
   }
 }
-function createAccessToken(user) {
+async function createAccessToken(user) {
   return jwt.sign(user, Key, { expiresIn: '1d' });
 }
 function createRefreshToken(user) {
@@ -50,4 +95,4 @@ function createRefreshToken(user) {
     expiresIn: '1d',
   });
 }
-module.exports = new AuthController();
+module.exports = new authController();
