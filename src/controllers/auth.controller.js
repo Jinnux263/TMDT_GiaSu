@@ -5,8 +5,38 @@ const constants = require('../config/constants');
 const Key = constants.Key;
 class authController {
   async register(req, res) {
-    res.send('Registerd');
+    const user = new Users(req.body);
+    // res.redirect('/login')
+    await user.save(async function (err) {
+      if (!err) {
+        if (user?.role === 1) {
+          const element = {
+            user: req.body,
+            degree: '',
+            grade: 0,
+            Faculity: '',
+            School: '',
+            Description: '',
+            courses: [],
+            studentId: 0,
+            rate: [],
+          };
+          const tutor = new Tutors(element);
+          await tutor.save(function (err) {
+            if (!err) res.send('add data to tutors table successfully!');
+            else res.status(500).jsonp({ error: 'message' });
+          });
+        } else if (user?.role === 2) {
+          const customer = new Customers({ user: req.body, courses: [] });
+          await customer.save(function (err) {
+            if (!err) res.send('add data to customers table successfully!');
+            else res.status(500).jsonp({ error: 'message' });
+          });
+        }
+      } else res.status(500).jsonp({ error: 'message' });
+    });
   }
+
   async login(req, res) {
     try {
       const { email, password } = req.body;
