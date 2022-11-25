@@ -1,4 +1,6 @@
 const Users = require('../models/users.model');
+const Tutors = require('../models/tutors.model');
+const Customers = require('../models/customers.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
