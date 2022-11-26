@@ -1,9 +1,11 @@
 const Users = require('../models/users.model');
+const Tutors = require('../models/tutors.model');
+const Customers = require('../models/customers.model');
+const Payments = require('../models/payments.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const constants = require('../config/constants');
-const Key = constants.Key;
-class authController {
+
+class AuthController {
   async register(req, res) {
     const user = new Users(req.body);
     // res.redirect('/login')
@@ -36,7 +38,6 @@ class authController {
       } else res.status(500).jsonp({ error: 'message' });
     });
   }
-
   async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -61,6 +62,14 @@ class authController {
         email: user.email,
         password: password,
       });
+      // const accessToken = await createAccessToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
+      // const refreshToken = createRefreshToken({
+      //   email: 'tandat2603',
+      //   password: 'password',
+      // });
 
       res.cookie('refreshtoken', refreshToken, {
         path: '/user/refresh_token',
@@ -73,7 +82,7 @@ class authController {
     }
   }
 }
-async function createAccessToken(user) {
+function createAccessToken(user) {
   return jwt.sign(user, Key, { expiresIn: '1d' });
 }
 function createRefreshToken(user) {
@@ -81,4 +90,4 @@ function createRefreshToken(user) {
     expiresIn: '1d',
   });
 }
-module.exports = new authController();
+module.exports = new AuthController();
