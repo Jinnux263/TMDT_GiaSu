@@ -23,11 +23,9 @@ app.use(
 app.get('/', function (req, res) {
   res.send(`Server is running at ${HOST}:${PORT}`);
 });
-app.use('/user', require('./src/routers/users.route'));
-app.use('/api', require('./src/routers/category.route'));
-app.use('/api', require('./src/routers/products.route'));
-app.use('/api', require('./src/routers/payments.route'));
-app.use('/', require('./src/routers/auth.route'));
+// app.use('/user', require('./src/routers/users.route'));
+app.use('/grade', require('./src/routers/grade.route'))
+app.use('/subject', require('./src/routers/subject.route'))
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
