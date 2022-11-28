@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema(
         dob: Date,
         email: reqString,
         balance: reqNumber
+    },{
+        timestamp: true
     }
 )
 module.exports = mongoose.model("User", userSchema)
