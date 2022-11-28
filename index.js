@@ -26,6 +26,9 @@ app.get('/', function (req, res) {
 // app.use('/user', require('./src/routers/users.route'));
 app.use('/grade', require('./src/routers/grade.route'))
 app.use('/subject', require('./src/routers/subject.route'))
+app.use('/user', require('./src/routers/user.route'))
+app.use('/customer', require('./src/routers/customer.route'))
+app.use('/course', require('./src/routers/course.route'))
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

@@ -2,11 +2,11 @@
 const mongoose = require('mongoose');
 const customerSchema = mongoose.Schema(
     {
-        _id: {
+        id_user: {
             type: String,
             ref: "User"
         },
-        numer_of_course: {
+        number_of_course: {
             type: Number
         }
     }
