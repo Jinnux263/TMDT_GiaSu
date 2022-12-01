@@ -7,12 +7,21 @@ const constants = require('../config/constants');
 const Key = constants.Key;
 class authController {
   async register(req, res) {
-    const user = new Users(req.body);
-    await user.save(async function (err) {
+    const { username } = req.body;
+    const user = await User.findOne({
+      username,
+    });
+    if (user)
+      return res
+        .status(500)
+        .json({ err: err.messages, error: 'This account has already existed' });
+
+    const newUser = new Users(req.body);
+    await newUser.save(async function (err) {
       if (!err) {
-        if (user?.role === 1) {
+        if (newUser?.role === 'tutor') {
           const data = {
-            _id: user._id,
+            _id: newUser._id,
             degree: '',
             facultity: '',
             school: '',
@@ -27,9 +36,9 @@ class authController {
             if (!err) res.send('add data to tutors table successfully!');
             else res.status(500).jsonp({ error: 'message' });
           });
-        } else if (user?.role === 2) {
+        } else if (newUser?.role === 'customer') {
           const customer = new Customers({
-            _id: user._id,
+            _id: newUser._id,
             number_of_course: 0,
           });
           await customer.save(function (err) {

@@ -13,9 +13,15 @@ const userSchema = new mongoose.Schema({
   phone_number: reqString,
   name: reqString,
   address: reqString,
-  gender: Boolean,
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+  },
   dob: Date,
-  role: reqNumber,
+  role: {
+    type: String,
+    enum: ['customer', 'tutor'],
+  },
   email: reqString,
   balance: reqNumber,
 });
