@@ -11,6 +11,8 @@ const tutor_courseSchema = mongoose.Schema(
     },
     status: {
       type: String,
+      enum: ['Pending', 'Reject', 'Accept', 'Finish', 'Ongoing'],
+      default: 'Pending',
       required: true,
     },
   },
