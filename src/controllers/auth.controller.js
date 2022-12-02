@@ -1,46 +1,61 @@
-const Users = require('../models/users.model');
+const User = require('../models/user.model');
+const Customers = require('../models/customer.model');
+const Tutors = require('../models/tutor.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
 const Key = constants.Key;
 class authController {
   async register(req, res) {
-    const user = new Users(req.body);
-    // res.redirect('/login')
-    await user.save(async function (err) {
+    const { username } = req.body;
+    const user = await User.findOne({
+      username,
+    });
+    if (user)
+      return res
+        .status(500)
+        .json({ data: req.body, error: 'This account has already existed' });
+
+    const newUser = new User(req.body);
+    await newUser.save(async function (err) {
       if (!err) {
-        if (user?.role === 1) {
-          const element = {
-            user: req.body,
+        if (newUser?.role == "tutor" ) {
+          const data = {
+            user: newUser._id,
             degree: '',
-            grade: 0,
-            Faculity: '',
-            School: '',
-            Description: '',
-            courses: [],
-            studentId: 0,
-            rate: [],
+            facultity: '',
+            school: '',
+            description: '',
+            student_id: '',
+            rate_star: 0,
           };
-          const tutor = new Tutors(element);
+          const tutor = new Tutors(data);
           await tutor.save(function (err) {
+            // đăng ký thành công -> chuyển về trang đăng nhập
+            // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to tutors table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({data: req.body,error: err.message });
           });
-        } else if (user?.role === 2) {
-          const customer = new Customers({ user: req.body, courses: [] });
+        } else if (newUser?.role == "customer") {
+          const customer = new Customers({
+            user: newUser._id,
+            number_of_course: 0,
+          });
           await customer.save(function (err) {
+            // đăng ký thành công -> chuyển về trang đăng nhập
+            // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to customers table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({data:req.body, error: err.message });
           });
         }
-      } else res.status(500).jsonp({ error: 'message' });
+      } else res.status(500).jsonp({ data: req.body,error: err.message });
     });
   }
 
   async login(req, res) {
     try {
       const { email, password } = req.body;
-      var user = await Users.findOne({
+      var user = await User.findOne({
         email,
       });
 
