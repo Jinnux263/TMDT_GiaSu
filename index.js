@@ -4,7 +4,6 @@ const expressFileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 
 HOST = 'http://localhost';
 PORT = process.env.PORT || 3000;
