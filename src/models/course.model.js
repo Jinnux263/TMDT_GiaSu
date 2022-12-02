@@ -30,6 +30,9 @@ const courseSchema = mongoose.Schema(
             type: String,
             ref: "Customer"
         }
+    },
+    {
+        timestamps: true
     }
 )
 module.exports = mongoose.model("Course", courseSchema)

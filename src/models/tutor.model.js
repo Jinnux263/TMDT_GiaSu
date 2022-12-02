@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 reqString = {
-    type: String,
-    required: true,
+  type: String,
+  required: true,
 };
 reqNumber = {
-    type: Number,
-    required: true,
+  type: Number,
+  required: true,
 };
-const tutorSchema = mongoose.Schema({
+const tutorSchema = mongoose.Schema(
+  {
     user: {
-        type: String,
-        ref: 'User',
+      type: String,
+      ref: 'User',
     },
     degree: String,
     facultity: String,
@@ -19,6 +20,8 @@ const tutorSchema = mongoose.Schema({
     student_id: String,
     rate_star: Number,
     verified: { type: Boolean, default: false },
-});
+  },
+  { timestamps: true },
+);
 
 module.exports = mongoose.model('Tutor', tutorSchema);
