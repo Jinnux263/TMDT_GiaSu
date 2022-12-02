@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const Customer = require('../models/customer.model')
+const Course = require('../models/course.model')
+
 router.get('/', async (req, res) => {
     try {
         const customers = [
