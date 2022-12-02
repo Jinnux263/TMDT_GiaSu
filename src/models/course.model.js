@@ -23,9 +23,9 @@ const courseSchema = mongoose.Schema(
         status: reqString,
         deadline: Date,
         salary: reqNumber,
-        number_of_student: reqNumber,
-        start_date: Date,
-        end_date: Date,
+        numberOfStudent: reqNumber,
+        startDate: Date,
+        endDate: Date,
         customer: {
             type: String,
             ref: "Customer"
