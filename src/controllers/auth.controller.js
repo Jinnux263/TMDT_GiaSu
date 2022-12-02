@@ -10,9 +10,9 @@ class authController {
     const user = new Users(req.body);
     await user.save(async function (err) {
       if (!err) {
-        if (user?.role === 1) {
+        if (user?.role == "tutor" ) {
           const data = {
-            _id: user._id,
+            user: user._id,
             degree: '',
             facultity: '',
             school: '',
@@ -25,21 +25,21 @@ class authController {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to tutors table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({data: req.body,error: err.message });
           });
-        } else if (user?.role === 2) {
+        } else if (user?.role == "customer") {
           const customer = new Customers({
-            _id: user._id,
+            user: user._id,
             number_of_course: 0,
           });
           await customer.save(function (err) {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to customers table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({data:req.body, error: err.message });
           });
         }
-      } else res.status(500).jsonp({ error: 'message' });
+      } else res.status(500).jsonp({ error: err.message });
     });
   }
 

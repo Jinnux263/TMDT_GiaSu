@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const customerSchema = mongoose.Schema({
-  _id: {
+  user: {
     type: String,
     ref: 'User',
   },
