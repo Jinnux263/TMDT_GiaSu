@@ -7,22 +7,36 @@ reqNumber = {
   type: Number,
   required: true,
 };
-const userSchema = new mongoose.Schema({
-  username: reqString,
-  password: reqString,
-  phone_number: reqString,
-  name: reqString,
-  address: reqString,
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: reqString,
+    phone_number: reqString,
+    fullname: reqString,
+    address: reqString,
+    gender: {
+      type: String,
+      enum: ['male', 'female'],
+      default: 'male',
+    },
+    dob: Date,
+    role: {
+      type: String,
+      enum: ['tutor', 'customer'],
+      default: 'tutor',
+    },
+    email: reqString,
+    balance: {
+      type: Number,
+      default: 0,
+    },
   },
-  dob: Date,
-  role: {
-    type: String,
-    enum: ['customer', 'tutor'],
+  {
+    timestamps: true,
   },
-  email: reqString,
-  balance: reqNumber,
-});
+);
 module.exports = mongoose.model('User', userSchema);

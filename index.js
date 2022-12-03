@@ -4,7 +4,6 @@ const expressFileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 
 HOST = 'http://localhost';
 PORT = process.env.PORT || 3000;
@@ -23,10 +22,12 @@ app.use(
 app.get('/', function (req, res) {
   res.send(`Server is running at ${HOST}:${PORT}`);
 });
-// app.use('/user', require('./src/routers/users.route'));
 app.use('/grade', require('./src/routers/grade.route'));
 app.use('/subject', require('./src/routers/subject.route'));
 app.use('/', require('./src/routers/auth.route'));
+app.use('/user', require('./src/routers/user.route'))
+app.use('/customer', require('./src/routers/customer.route'))
+app.use('/course', require('./src/routers/course.route'))
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

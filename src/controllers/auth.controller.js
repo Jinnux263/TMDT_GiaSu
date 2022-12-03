@@ -1,4 +1,4 @@
-const Users = require('../models/user.model');
+const User = require('../models/user.model');
 const Customers = require('../models/customer.model');
 const Tutors = require('../models/tutor.model');
 const bcrypt = require('bcrypt');
@@ -14,14 +14,14 @@ class authController {
     if (user)
       return res
         .status(500)
-        .json({ err: err.messages, error: 'This account has already existed' });
+        .json({ data: req.body, error: 'This account has already existed' });
 
-    const newUser = new Users(req.body);
+    const newUser = new User(req.body);
     await newUser.save(async function (err) {
       if (!err) {
-        if (newUser?.role === 'tutor') {
+        if (newUser?.role == 'tutor') {
           const data = {
-            _id: newUser._id,
+            user: newUser._id,
             degree: '',
             facultity: '',
             school: '',
@@ -34,21 +34,21 @@ class authController {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to tutors table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({ data: req.body, error: err.message });
           });
-        } else if (newUser?.role === 'customer') {
+        } else if (newUser?.role == 'customer') {
           const customer = new Customers({
-            _id: newUser._id,
+            user: newUser._id,
             number_of_course: 0,
           });
           await customer.save(function (err) {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to customers table successfully!');
-            else res.status(500).jsonp({ error: 'message' });
+            else res.status(500).jsonp({ data: req.body, error: err.message });
           });
         }
-      } else res.status(500).jsonp({ error: 'message' });
+      } else res.status(500).jsonp({ data: req.body, error: err.message });
     });
   }
 
