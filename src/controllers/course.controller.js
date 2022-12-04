@@ -2,7 +2,6 @@ const courseModel = require('../models/course.model');
 const customerModel = require('../models/customer.model');
 const tutorCourseModel = require('../models/tutor_course.model');
 const tutorModel = require('../models/tutor.model');
-const { default: mongoose } = require('mongoose');
 class CourseController {
   async getAllCourse(req, res) {
     try {
@@ -80,11 +79,28 @@ class CourseController {
         .send({ data: 'error', message: 'Lỗi ở API /course/delete' });
     }
   }
-  async applyCourse(req, res) {
+  async getAppliedTutors(req, res) {
+    try {
+      const { courseId } = req.params;
+      const course = await courseModel.findById(courseId);
+      if (!course) {
+        res.status(404).json({ data: courseId, message: 'No course found' });
+        return;
+      }
+      const tutorCourses = await tutorCourseModel
+        .find({
+          course: courseId,
+        })
+        .populate('tutor');
+      res.status(200).json(tutorCourses);
+    } catch (error) {
+      res.status(500).json({ data: { courseId: req.params.courseId } });
+    }
+  }
+  async tutorApply(req, res) {
     try {
       const { tutorId } = req.body;
       const courseId = req.params.courseId;
-      console.log('Apply Course', tutorId, courseId);
       const tutor = await tutorModel.findOne({ _id: tutorId });
       if (!tutor) {
         res.status(400).json({ data: req.body, message: 'Tutor not found' });
@@ -136,6 +152,7 @@ class CourseController {
           data: { tutorId, courseId },
           message: 'Tutor did not apply to this Course',
         });
+        return;
       }
       tutorCourse.status = 'Ongoing';
       let otherTutorCourses = await tutorCourseModel.find({

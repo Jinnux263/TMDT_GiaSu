@@ -6,7 +6,8 @@ const courseController = require('../controllers/course.controller');
 router.get('/', courseController.getAllCourse);
 
 router.post('/', courseController.createCourse);
-router.post('/:courseId/apply', courseController.applyCourse);
+router.post('/:courseId/apply', courseController.tutorApply);
+router.get('/:courseId/applied-tutors', courseController.getAppliedTutors);
 router.post('/:courseId/accept-tutor', courseController.acceptTutor);
 router.post('/create-multiple', courseController.createMultipleCourse);
 
