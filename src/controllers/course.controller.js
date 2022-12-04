@@ -2,6 +2,7 @@ const courseModel = require('../models/course.model');
 const customerModel = require('../models/customer.model');
 const tutorCourseModel = require('../models/tutor_course.model');
 const tutorModel = require('../models/tutor.model');
+const { default: mongoose } = require('mongoose');
 class CourseController {
   async getAllCourse(req, res) {
     try {
@@ -95,8 +96,8 @@ class CourseController {
         return;
       }
       const tutorCourse = new tutorCourseModel({
-        tutor,
-        course,
+        tutor: tutorId,
+        course: courseId,
         status: 'Pending',
       });
       tutorCourse.save((err) => {
@@ -105,6 +106,56 @@ class CourseController {
       });
     } catch (error) {
       res.status(500).json({ data: req.body, message: error.message });
+    }
+  }
+  async acceptTutor(req, res) {
+    try {
+      const { tutorId } = req.body;
+      const courseId = req.params.courseId;
+      const tutor = await tutorModel.findOne({ _id: tutorId });
+      if (!tutor) {
+        res
+          .status(400)
+          .json({ data: { tutorId, courseId }, message: 'Tutor not found' });
+        return;
+      }
+      const course = await courseModel.findOne({ _id: courseId });
+      if (!course) {
+        res
+          .status(400)
+          .json({ data: { tutorId, courseId }, message: 'Course not found' });
+        return;
+      }
+      const tutorCourse = await tutorCourseModel.findOne({
+        tutor: tutorId,
+        course: courseId,
+        status: 'Pending',
+      });
+      if (!tutorCourse) {
+        res.status(400).json({
+          data: { tutorId, courseId },
+          message: 'Tutor did not apply to this Course',
+        });
+      }
+      tutorCourse.status = 'Ongoing';
+      let otherTutorCourses = await tutorCourseModel.find({
+        course: courseId,
+        tutor: { $ne: tutorId },
+      });
+      console.log('other', otherTutorCourses);
+      await tutorCourseModel.updateMany(
+        { course: courseId, tutor: { $ne: tutorId } },
+        { $set: { status: 'Reject' } },
+      );
+      await tutorCourse.save();
+      res
+        .status(200)
+        .json({ data: { tutorId, courseId }, message: 'Accept Tutor success' });
+    } catch (error) {
+      res.status(500).json({
+        data: { tutorId: req.body.tutorId, courseId: req.params.courseId },
+        message: error.message,
+      });
     }
   }
 }
