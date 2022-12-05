@@ -1,7 +1,7 @@
 const customerModel = require('../models/customer.model');
 const tutorModel = require('../models/tutor.model');
 const userModel = require('../models/user.model');
-const transactionModel = require('../models/transaction.model');
+const TransactionModel = require('../models/transaction.model');
 
 class PaymentController {
   // Todo: hien thuc ba loai giao dich o day
@@ -14,111 +14,79 @@ class PaymentController {
   // Todo: Ham ben ngoai su dung
   async makeTransaction(req, res) {
     try {
-      let users = await userModel.find({});
-      res.status(200).send(users);
+      const { tutorId: transactionId } = req.params;
+      var transaction = await TransactionModel.findOne({
+        _id: transactionId,
+      });
+      if (!transaction) {
+        return res
+          .status(404)
+          .json({ data: req.params, message: 'transaction not found' });
+      }
+      res.status(200).send(transaction.populate('_id'));
     } catch (error) {
-      res.status(500).json(error.message);
+      res.status(500).json({ data: req.params, message: error.message });
     }
   }
 
   // Todo: Cac ham de lay thong tin cua transaction
   async getTransactionById(req, res) {
     try {
-      let filter = req.query;
-      let users = await userModel.find(filter);
-      // customers
-      if (filter?.role == 'customer') {
-        let customers = await Promise.all(
-          users.map(async (user) => {
-            return await customerModel
-              .findOne({ user: user._id.toString() })
-              .populate('user');
-          }),
-        );
-        res.status(200).json(customers);
-      }
-      // Tutor
-      else if (filter?.role == 'tutor') {
-        let tutors = await Promise.all(
-          users.map(async (user) => {
-            return await tutorModel
-              .findOne({ user: user._id.toString() })
-              .populate('user');
-          }),
-        );
-        res.status(200).json(tutors);
-      } else {
-        res.status(400).json({ data: req.query, message: 'No role specified' });
-      }
-    } catch (error) {
-      res.status(500).json({ data: req.query, message: error.message });
-    }
-  }
-  async getAllTransaction(req, res) {
-    try {
-      const { userId } = req.params;
-      var user = await userModel.findById(userId);
-      if (!user) {
+      const { transactionId } = req.params;
+      var transaction = await TransactionModel.findOne({
+        _id: transactionId,
+      });
+      if (!transaction) {
         return res
           .status(404)
-          .json({ data: req.params, message: 'User not found' });
+          .json({ data: req.params, message: 'transaction not found' });
       }
-      let publicFields = [
-        '_id',
-        'username',
-        'phone_number',
-        'fullname',
-        'address',
-        'gender',
-        'dob',
-        'email',
-        'role',
-      ];
-      let populatedUser =
-        user.role == 'tutor'
-          ? await tutorModel
-              .findOne({ user: user._id.toString() })
-              .populate('user', publicFields)
-          : await customerModel
-              .findOne({ user: user._id.toString() })
-              .populate('user', publicFields);
-      res.status(200).send(populatedUser);
+      res.status(200).send(transaction.populate('_id'));
     } catch (error) {
       res.status(500).json({ data: req.params, message: error.message });
     }
   }
+  async getAllTransaction(req, res) {
+    try {
+      let transactions = await TransactionModel.find({});
+      res.status(200).send(
+        transactions.map((transaction) => {
+          return transactions.populate('_id');
+        }),
+      );
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+  }
   async getAllTransactionOfUser(req, res) {
     try {
-      const data = req.body;
-      let userId = req.params.userId;
-      // return "Oke"
-      var user = await userModel.findById(userId);
+      const { userId } = req.params;
+      var user = await User.findOne({
+        _id: tutorId,
+      });
       if (!user) {
-        res.status(404).json({ data: req.body, message: 'User not found' });
-      } else {
-        user.phone_number = data.phone_number || user.phone_number;
-        user.fullname = data.fullname || user.fullname;
-        user.address = data.address || user.address;
-        // user.gender = data.gender || user.gender;
-        user.dob = data.dob || user.dob;
-        user.email = data.email || user.email;
-        if (user.role == 'tutor') {
-          var tutor = await tutorModel.findOne({ user: userId });
-          console.log('Tutor', tutor);
-          tutor.degree = data.degree || tutor.degree;
-          tutor.faculity = data.faculity || tutor.faculity;
-          tutor.school = data.school || tutor.school;
-          tutor.description = data.description || tutor.description;
-          tutor.student_id = data.student_id || tutor.student_id;
-        }
-        await tutor.save();
-        await user.save().then((savedUser) => {
-          user = savedUser;
-        });
-        res.status(200).json(user);
+        return res
+          .status(404)
+          .json({ data: req.params, message: 'user not found' });
       }
+
+      // Todo: Tim bang user id
+      var transactions = await TransactionModel.find({
+        _id: userId,
+      });
+
+      if (!transactions) {
+        return res
+          .status(404)
+          .json({ data: req.params, message: 'transaction not found' });
+      }
+      res.status(200).send(
+        transactions.map((transaction) => {
+          return transactions.populate('_id');
+        }),
+      );
     } catch (error) {
-      res.status(500).json({ data: req.body, message: error.message });
+      res.status(500).json({ data: req.params, message: error.message });
     }
   }
 
