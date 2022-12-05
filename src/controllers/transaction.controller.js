@@ -11,7 +11,7 @@ class Transaction {
 
   async makePayment(req, res) {}
 
-  // Todo: Ham ben ngoai su dung
+  // Todo: Ham ben ngoai su dung de get thong tin
   async makeTransaction(req, res) {
     try {
       const { tutorId: transactionId } = req.params;
@@ -28,8 +28,6 @@ class Transaction {
       res.status(500).json({ data: req.params, message: error.message });
     }
   }
-
-  // Todo: Cac ham de lay thong tin cua transaction
   async getTransactionById(req, res) {
     try {
       const { transactionId } = req.params;
@@ -58,6 +56,8 @@ class Transaction {
       res.status(500).json(error.message);
     }
   }
+
+  // Todo: Cac ham de lay thong tin cua transaction
   async getAllTransactionOfUser(req, res) {
     try {
       const { userId } = req.params;
