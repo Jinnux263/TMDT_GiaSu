@@ -17,11 +17,11 @@ const transactionSchema = new mongoose.Schema(
     },
     amount: reqNumber,
     source: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
     destination: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
   },
