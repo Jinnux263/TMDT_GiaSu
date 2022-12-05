@@ -16,8 +16,14 @@ const transactionSchema = new mongoose.Schema(
       required: true,
     },
     amount: reqNumber,
-    source: reqString,
-    destination: reqString,
+    source: {
+      type: String,
+      ref: 'User',
+    },
+    destination: {
+      type: String,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,

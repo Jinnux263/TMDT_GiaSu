@@ -13,6 +13,7 @@ class Transaction {
 
   // Todo: Ham ben ngoai su dung de get thong tin
   async makeTransaction(req, res) {
+    // Todo: Chua lam
     try {
       const { tutorId: transactionId } = req.params;
       var transaction = await TransactionModel.findOne({
@@ -92,6 +93,7 @@ class Transaction {
 
   // Todo: Chi lam trong truong hop admin muon chinh sua he thong
   async deleteTransaction(req, res) {
+    // Todo: Chua lam
     try {
       const { _id, transaction } = req.body.data;
       const transactionToDelete = await TransactionModel.findOneAndDelete({
