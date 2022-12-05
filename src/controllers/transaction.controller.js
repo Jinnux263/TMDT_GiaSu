@@ -13,20 +13,17 @@ class Transaction {
 
   // Todo: Ham ben ngoai su dung de get thong tin
   async makeTransaction(req, res) {
-    // Todo: Chua lam
-    try {
-      const { tutorId: transactionId } = req.params;
-      var transaction = await TransactionModel.findOne({
-        _id: transactionId,
-      });
-      if (!transaction) {
-        return res
-          .status(404)
-          .json({ data: req.params, message: 'transaction not found' });
-      }
-      res.status(200).send(transaction.populate('_id'));
-    } catch (error) {
-      res.status(500).json({ data: req.params, message: error.message });
+    const transactionDto = req.body;
+    if (transactionDto.type === 'Deposit') {
+      return this.deposit(req, res);
+    } else if (transactionDto.type === 'Withdrawal') {
+      return this.withdrawal(req, res);
+    } else if (transactionDto.type === 'Payment') {
+      return this.makePayment(req, res);
+    } else {
+      return res
+        .status(500)
+        .json({ data: transactionDto, message: 'transaction type incorrect' });
     }
   }
   async getTransactionById(req, res) {
