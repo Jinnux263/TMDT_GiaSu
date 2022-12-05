@@ -1,7 +1,7 @@
 const courseModel = require('../models/course.model');
 const customerModel = require('../models/customer.model');
 const tutorCourseModel = require('../models/tutor_course.model');
-
+const tutorModel = require('../models/tutor.model');
 class CourseController {
   async getAllCourse(req, res) {
     try {
@@ -82,14 +82,17 @@ class CourseController {
   async applyCourse(req, res) {
     try {
       const { tutorId } = req.body;
-      const courseId = req.param.courseId;
+      const courseId = req.params.courseId;
+      console.log('Apply Course', tutorId, courseId);
       const tutor = await tutorModel.findOne({ _id: tutorId });
       if (!tutor) {
         res.status(400).json({ data: req.body, message: 'Tutor not found' });
+        return;
       }
       const course = await courseModel.findOne({ _id: courseId });
       if (!course) {
         res.status(400).json({ data: req.body, message: 'Course not found' });
+        return;
       }
       const tutorCourse = new tutorCourseModel({
         tutor,
