@@ -1,23 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/transaction.model');
+const TransactionController = require('../controllers/transaction.controller');
 
-router.get('/', async (req, res) => {
-  try {
-    let subjects = await Transaction.find({});
-    res.status(200).send(subjects);
-  } catch (error) {
-    res.status(500).json(error.message);
-  }
-});
+// Todo: Them middleware auth voi authAdmin vo router nay
 
-router.post('/', async (req, res) => {
-  try {
-    const subject = await Transaction.create(req.body);
-    res.status(201).json(subject);
-  } catch (error) {
-    res.status(500).json(error.message);
-  }
-});
+router.get('/', TransactionController.getAllTransactions);
+
+router.get('/:transactionId', TransactionController.getTransactionById);
+
+router.get('/user/:userId', TransactionController.getAllTransactions);
 
 module.exports = router;
