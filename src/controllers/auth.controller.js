@@ -11,10 +11,12 @@ class authController {
     const user = await User.findOne({
       username,
     });
-    if (user)
+    if (user) {
       res
         .status(500)
         .json({ data: req.body, error: 'This account has already existed' });
+      return;
+    }
 
     const newUser = new User(req.body);
     newUser.password = await bcrypt.hash(newUser.password, 10);
@@ -34,8 +36,15 @@ class authController {
           await tutor.save(function (err) {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
-            if (!err) res.send('add data to tutors table successfully!');
-            else res.status(500).jsonp({ data: req.body, error: err.message });
+            if (!err) {
+              res.json({ user: user, message: 'Signup successfully.' });
+              return;
+            }
+            // if (!err) res.send('add data to tutors table successfully!');
+            else {
+              res.status(500).jsonp({ data: req.body, error: err.message });
+              return;
+            }
           });
         } else if (newUser?.role == 'customer') {
           const customer = new Customers({
@@ -45,8 +54,15 @@ class authController {
           await customer.save(function (err) {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
-            if (!err) res.send('add data to customers table successfully!');
-            else res.status(500).jsonp({ data: req.body, error: err.message });
+            if (!err) {
+              res.json({ user: user, message: 'Signup successfully.' });
+              return;
+            }
+            // res.send('add data to customers table successfully!');
+            else {
+              res.status(500).jsonp({ data: req.body, error: err.message });
+              return;
+            }
           });
         }
       } else res.status(500).jsonp({ data: req.body, error: err.message });
@@ -59,7 +75,6 @@ class authController {
       var user = await User.findOne({
         username,
       });
-      console.log(user);
       if (!user) {
         res
           .status(500)
@@ -89,9 +104,8 @@ class authController {
         httpOnly: true,
       });
 
-      res.json({ accessToken });
+      res.json({ user: user, accessToken });
     } catch (error) {
-      console.log(error.message);
       res.status(500).json({ data: req.body, error: error.message });
     }
   }
