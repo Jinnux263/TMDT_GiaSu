@@ -12,14 +12,15 @@ class authController {
       username,
     });
     if (user)
-      return res
+      res
         .status(500)
         .json({ data: req.body, error: 'This account has already existed' });
 
     const newUser = new User(req.body);
+    newUser.password = await bcrypt.hash(newUser.password, 10);
     await newUser.save(async function (err) {
       if (!err) {
-        if (newUser?.role == "tutor" ) {
+        if (newUser?.role == 'tutor') {
           const data = {
             user: newUser._id,
             degree: '',
@@ -34,9 +35,9 @@ class authController {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to tutors table successfully!');
-            else res.status(500).jsonp({data: req.body,error: err.message });
+            else res.status(500).jsonp({ data: req.body, error: err.message });
           });
-        } else if (newUser?.role == "customer") {
+        } else if (newUser?.role == 'customer') {
           const customer = new Customers({
             user: newUser._id,
             number_of_course: 0,
@@ -45,35 +46,37 @@ class authController {
             // đăng ký thành công -> chuyển về trang đăng nhập
             // res.redirect('http://localhost:3000/login');
             if (!err) res.send('add data to customers table successfully!');
-            else res.status(500).jsonp({data:req.body, error: err.message });
+            else res.status(500).jsonp({ data: req.body, error: err.message });
           });
         }
-      } else res.status(500).jsonp({ data: req.body,error: err.message });
+      } else res.status(500).jsonp({ data: req.body, error: err.message });
     });
   }
 
   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
       var user = await User.findOne({
-        email,
+        username,
       });
-
+      console.log(user);
       if (!user)
-        return res
+        res
           .status(500)
-          .json({ err: err.messages, error: 'User has not been registered' });
+          .json({ data: req.body, message: 'Authentification failed' });
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch)
-        return res.status(400).json({ msg: 'Authentification failed' });
+        res
+          .status(400)
+          .json({ data: req.body, message: 'Authentification failed' });
 
-      const accessToken = createAccessToken({
-        email: user.email,
+      const accessToken = await createAccessToken({
+        username: user.username,
         password: password,
       });
-      const refreshToken = createRefreshToken({
-        email: user.email,
+      const refreshToken = await createRefreshToken({
+        username: user.username,
         password: password,
       });
 
@@ -83,15 +86,16 @@ class authController {
       });
 
       res.json({ accessToken });
-    } catch (err) {
-      return res.status(500).json({ message: err });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ data: req.body, error: error.message });
     }
   }
 }
 async function createAccessToken(user) {
   return jwt.sign(user, Key, { expiresIn: '1d' });
 }
-function createRefreshToken(user) {
+async function createRefreshToken(user) {
   return jwt.sign(user, Key, {
     expiresIn: '1d',
   });
