@@ -11,6 +11,10 @@ router.get('/', auth, TransactionController.getAllTransactions);
 
 router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
-router.get('/user/:userId', auth, TransactionController.getAllTransactions);
+router.get(
+  '/user/:userId',
+  auth,
+  TransactionController.getAllTransactionOfUser,
+);
 
 module.exports = router;

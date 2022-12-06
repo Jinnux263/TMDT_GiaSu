@@ -78,6 +78,13 @@ class Transaction {
   async getTransactionById(req, res) {
     try {
       const { transactionId } = req.params;
+      if (!transactionId.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(404).json({
+          data: req.params,
+          message: 'there is no transaction with id ' + transactionId,
+        });
+      }
+
       var transaction = await TransactionModel.findOne({
         _id: transactionId,
       });
@@ -107,6 +114,12 @@ class Transaction {
   async getAllTransactionOfUser(req, res) {
     try {
       const { userId } = req.params;
+      if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(404).json({
+          data: req.params,
+          message: 'there is no user with id ' + userId,
+        });
+      }
       var user = await UserModel.findOne({
         _id: userId,
       });
