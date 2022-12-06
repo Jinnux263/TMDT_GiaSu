@@ -5,8 +5,9 @@ class Transaction {
   // Todo: hien thuc ba loai giao dich o day
   async deposit(req, res) {
     // User nay la destination
-    const { userId } = req.params;
-    var user = await UserModel.findOne({
+    const { userId } = req.body;
+
+    const user = await UserModel.findOne({
       _id: userId,
     });
     if (!user) {
@@ -20,9 +21,9 @@ class Transaction {
 
   async withdrawal(req, res) {
     // User nay la destination
-    const { desUserId } = req.params;
+    const { desUserId } = req.body;
     const desUser = await UserModel.findOne({
-      _id: userId,
+      _id: desUserId,
     });
     if (!desUser) {
       return res
@@ -35,9 +36,9 @@ class Transaction {
 
   async makeTransaction(req, res) {
     // User nay la source
-    const { srcUserId } = req.params;
+    const { srcUserId } = req.body;
     const srcUser = await UserModel.findOne({
-      _id: userId,
+      _id: srcUserId,
     });
     if (!srcUser) {
       return res
@@ -48,7 +49,7 @@ class Transaction {
     // User nay la destination
     const { desUserId } = req.params;
     const desUser = await UserModel.findOne({
-      _id: userId,
+      _id: desUserId,
     });
     if (!desUser) {
       return res

@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
-const Key = '123456';
+const constants = require('../config/constants');
+const Key = constants.Key;
 
 const auth = (req, res, next) => {
   try {
     const token = req.header('Authorization');
     if (!token) return res.status(400).json({ msg: 'Not Authorized' });
-    jwt.verify(token, Key, (err, user) => {
+    jwt.verify(token.split(' ')[1], Key, (err, user) => {
       if (err) return res.status(400).json({ msg: 'Not Authorized' });
       req.user = user;
       next();

@@ -7,7 +7,7 @@ const authAdmin = require('../middlewares/authAdmin');
 // Todo: Them middleware auth voi authAdmin vo router nay
 router.post('/', auth, TransactionController.makeTransaction);
 
-router.get('/', auth, authAdmin, TransactionController.getAllTransactions);
+router.get('/', auth, TransactionController.getAllTransactions);
 
 router.get('/:transactionId', auth, TransactionController.getTransactionById);
 

@@ -100,6 +100,15 @@ class authController {
         username: user.username,
         password: password,
       });
+      await jwt.verify(accessToken, Key, (err, user) => {
+        // console.log(err.message);
+        if (err) {
+          log('Failed');
+        }
+        {
+          console.log('OK');
+        }
+      });
       const refreshToken = await createRefreshToken({
         username: user.username,
         password: password,
