@@ -12,13 +12,25 @@ class authController {
       username,
     });
     if (user) {
-      res
-        .status(500)
-        .json({ data: req.body, error: 'This account has already existed' });
+      res.status(500).json({ error: 'This account has already existed' });
       return;
     }
 
-    const newUser = new User(req.body);
+    const { password, email, address, fullname, role, gender, phone_number } =
+      req.body;
+    const dataOfUser = {
+      username: username,
+      password: password,
+      email: email,
+      address: address,
+      fullname: fullname,
+      role: role,
+      gender: gender,
+      phone_number: phone_number,
+      dob: new Date(),
+      balance: 0,
+    };
+    const newUser = new User(dataOfUser);
     newUser.password = await bcrypt.hash(newUser.password, 10);
     await newUser.save(async function (err) {
       if (!err) {
@@ -31,17 +43,14 @@ class authController {
             description: '',
             student_id: '',
             rate_star: 0,
+            verified: false,
           };
           const tutor = new Tutors(data);
           await tutor.save(function (err) {
-            // đăng ký thành công -> chuyển về trang đăng nhập
-            // res.redirect('http://localhost:3000/login');
             if (!err) {
-              res.json({ user: user, message: 'Signup successfully.' });
+              res.redirect('http://localhost:3000/login');
               return;
-            }
-            // if (!err) res.send('add data to tutors table successfully!');
-            else {
+            } else {
               res.status(500).jsonp({ data: req.body, error: err.message });
               return;
             }
@@ -52,14 +61,10 @@ class authController {
             number_of_course: 0,
           });
           await customer.save(function (err) {
-            // đăng ký thành công -> chuyển về trang đăng nhập
-            // res.redirect('http://localhost:3000/login');
             if (!err) {
-              res.json({ user: user, message: 'Signup successfully.' });
+              res.redirect('http://localhost:3000/login');
               return;
-            }
-            // res.send('add data to customers table successfully!');
-            else {
+            } else {
               res.status(500).jsonp({ data: req.body, error: err.message });
               return;
             }
@@ -84,9 +89,10 @@ class authController {
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        res
-          .status(400)
-          .json({ data: req.body, message: 'Authentification failed' });
+        res.status(400).json({
+          data: req.body,
+          message: 'Authentification failed',
+        });
         return;
       }
 
