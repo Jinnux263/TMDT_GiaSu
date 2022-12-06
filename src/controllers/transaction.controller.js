@@ -1,14 +1,25 @@
 const UserModel = require('../models/user.model');
 const TransactionModel = require('../models/transaction.model');
 
+function isNumeric(str) {
+  if (typeof str != 'string') return false;
+  return !isNaN(str) && !isNaN(parseFloat(str));
+}
 class Transaction {
   // Todo: hien thuc ba loai giao dich o day
   async deposit(req, res) {
-    // User nay la destination
-    const { userId } = req.body;
+    // Chekc destination
+    const { srcUserId } = req.body;
+    if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.params,
+        message: 'there is no user with id ' + srcUserId,
+      });
+    }
 
+    // Tim user de kiem tra lai
     const user = await UserModel.findOne({
-      _id: userId,
+      _id: srcUserId,
     });
     if (!user) {
       return res
@@ -17,11 +28,28 @@ class Transaction {
     }
 
     // Luu giao dich, cap nhat so du
+    if (!isNumeric(req.body.amount)) {
+      return res
+        .status(500)
+        .json({ data: req.body, message: 'amount must be a number' });
+    }
+    user.balance += parseInt(req.body.amount);
+    const result = await user.save();
+    return res
+      .status(500)
+      .json({ data: result, message: 'Update successfully' });
   }
 
   async withdrawal(req, res) {
     // User nay la destination
     const { desUserId } = req.body;
+    if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.params,
+        message: 'there is no user with id ' + desUserId,
+      });
+    }
+
     const desUser = await UserModel.findOne({
       _id: desUserId,
     });
@@ -34,9 +62,15 @@ class Transaction {
     // Chuyen tien tu hai tai khoan toi nhau
   }
 
-  async makeTransaction(req, res) {
+  async makePayment(req, res) {
     // User nay la source
     const { srcUserId } = req.body;
+    if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.params,
+        message: 'there is no user with id ' + srcUserId,
+      });
+    }
     const srcUser = await UserModel.findOne({
       _id: srcUserId,
     });
@@ -48,6 +82,12 @@ class Transaction {
 
     // User nay la destination
     const { desUserId } = req.params;
+    if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.params,
+        message: 'there is no user with id ' + desUserId,
+      });
+    }
     const desUser = await UserModel.findOne({
       _id: desUserId,
     });
@@ -59,7 +99,6 @@ class Transaction {
 
     // Chuyen tien tu hai tai khoan toi nhau
   }
-
   // Todo: Ham ben ngoai su dung
   async makeTransaction(req, res) {
     const transactionDto = req.body;
@@ -68,7 +107,7 @@ class Transaction {
     } else if (transactionDto.type === 'Withdrawal') {
       return this.withdrawal(req, res);
     } else if (transactionDto.type === 'Payment') {
-      return this.makeTransaction(req, res);
+      return this.makePayment(req, res);
     } else {
       return res
         .status(500)
@@ -110,7 +149,6 @@ class Transaction {
       res.status(500).json(error.message);
     }
   }
-
   async getAllTransactionOfUser(req, res) {
     try {
       const { userId } = req.params;
@@ -132,6 +170,7 @@ class Transaction {
       // Todo: Tim transaction bang user id
       var transactions = await TransactionModel.find({
         source: user._id,
+        desination: user._id,
       });
 
       if (!transactions) {
@@ -148,7 +187,6 @@ class Transaction {
       res.status(500).json({ data: req.params, message: error.message });
     }
   }
-
   // Todo: Chi lam trong truong hop admin muon chinh sua he thong
   // async deleteTransaction(req, res) {
   //   // Todo: Chua lam
