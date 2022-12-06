@@ -97,7 +97,7 @@ class Transaction {
 
       // Todo: Tim transaction bang user id
       var transactions = await TransactionModel.find({
-        source: { _id: userId },
+        source: user._id,
       });
 
       if (!transactions) {

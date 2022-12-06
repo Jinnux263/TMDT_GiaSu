@@ -17,6 +17,7 @@ class authController {
         .json({ data: req.body, error: 'This account has already existed' });
 
     const newUser = new User(req.body);
+    newUser.password = await bcrypt.hash(newUser.password, 10);
     await newUser.save(async function (err) {
       if (!err) {
         if (newUser?.role == 'tutor') {
@@ -54,9 +55,9 @@ class authController {
 
   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
       var user = await User.findOne({
-        email,
+        username,
       });
 
       if (!user)
@@ -68,12 +69,12 @@ class authController {
       if (!isMatch)
         return res.status(400).json({ msg: 'Authentification failed' });
 
-      const accessToken = createAccessToken({
-        email: user.email,
+      const accessToken = await createAccessToken({
+        username: user.username,
         password: password,
       });
-      const refreshToken = createRefreshToken({
-        email: user.email,
+      const refreshToken = await createRefreshToken({
+        username: user.username,
         password: password,
       });
 
@@ -91,7 +92,7 @@ class authController {
 async function createAccessToken(user) {
   return jwt.sign(user, Key, { expiresIn: '1d' });
 }
-function createRefreshToken(user) {
+async function createRefreshToken(user) {
   return jwt.sign(user, Key, {
     expiresIn: '1d',
   });
