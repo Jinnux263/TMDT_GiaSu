@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const Transaction = require('../models/transaction.model');
 const TransactionController = require('../controllers/transaction.controller');
+const auth = require('../middlewares/auth');
+const authAdmin = require('../middlewares/authAdmin');
 
 // Todo: Them middleware auth voi authAdmin vo router nay
+router.post('/', auth, TransactionController.makeTransaction);
 
-router.get('/', TransactionController.getAllTransactions);
+router.get('/', auth, authAdmin, TransactionController.getAllTransactions);
 
-router.get('/:transactionId', TransactionController.getTransactionById);
+router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
-router.get('/user/:userId', TransactionController.getAllTransactions);
+router.get('/user/:userId', auth, TransactionController.getAllTransactions);
 
 module.exports = router;

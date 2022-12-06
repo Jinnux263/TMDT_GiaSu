@@ -4,6 +4,7 @@ const TransactionModel = require('../models/transaction.model');
 class Transaction {
   // Todo: hien thuc ba loai giao dich o day
   async deposit(req, res) {
+    // User nay la destination
     const { userId } = req.params;
     var user = await UserModel.findOne({
       _id: userId,
@@ -13,30 +14,49 @@ class Transaction {
         .status(404)
         .json({ data: req.params, message: 'user not found' });
     }
+
+    // Luu giao dich, cap nhat so du
   }
 
   async withdrawal(req, res) {
-    const { userId } = req.params;
-    var user = await UserModel.findOne({
+    // User nay la destination
+    const { desUserId } = req.params;
+    const desUser = await UserModel.findOne({
       _id: userId,
     });
-    if (!user) {
+    if (!desUser) {
       return res
         .status(404)
         .json({ data: req.params, message: 'user not found' });
     }
+
+    // Chuyen tien tu hai tai khoan toi nhau
   }
 
-  async makePayment(req, res) {
-    const { userId } = req.params;
-    var user = await UserModel.findOne({
+  async makeTransaction(req, res) {
+    // User nay la source
+    const { srcUserId } = req.params;
+    const srcUser = await UserModel.findOne({
       _id: userId,
     });
-    if (!user) {
+    if (!srcUser) {
       return res
         .status(404)
         .json({ data: req.params, message: 'user not found' });
     }
+
+    // User nay la destination
+    const { desUserId } = req.params;
+    const desUser = await UserModel.findOne({
+      _id: userId,
+    });
+    if (!desUser) {
+      return res
+        .status(404)
+        .json({ data: req.params, message: 'user not found' });
+    }
+
+    // Chuyen tien tu hai tai khoan toi nhau
   }
 
   // Todo: Ham ben ngoai su dung
@@ -47,7 +67,7 @@ class Transaction {
     } else if (transactionDto.type === 'Withdrawal') {
       return this.withdrawal(req, res);
     } else if (transactionDto.type === 'Payment') {
-      return this.makePayment(req, res);
+      return this.makeTransaction(req, res);
     } else {
       return res
         .status(500)
