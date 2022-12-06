@@ -18,6 +18,21 @@ class authController {
 
     const { password, email, address, fullname, role, gender, phone_number } =
       req.body;
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !address ||
+      !fullname ||
+      !role ||
+      !gender ||
+      !phone_number
+    ) {
+      return res
+        .status(500)
+        .json({ data: req.body, message: 'Not enough information' });
+    }
+
     const dataOfUser = {
       username: username,
       password: password,
@@ -77,6 +92,12 @@ class authController {
   async login(req, res) {
     try {
       const { username, password } = req.body;
+      // Validate username and password
+      if (!username || !password) {
+        return res
+          .status(500)
+          .json({ data: req.body, message: 'Authentification failed' });
+      }
       var user = await User.findOne({
         username,
       });
