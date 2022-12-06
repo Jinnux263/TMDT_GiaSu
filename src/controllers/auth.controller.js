@@ -12,7 +12,7 @@ class authController {
       username,
     });
     if (user)
-      return res
+      res
         .status(500)
         .json({ data: req.body, error: 'This account has already existed' });
 
@@ -59,15 +59,17 @@ class authController {
       var user = await User.findOne({
         username,
       });
-
+      console.log(user);
       if (!user)
-        return res
+        res
           .status(500)
-          .json({ err: err.messages, error: 'User has not been registered' });
+          .json({ data: req.body, message: 'Authentification failed' });
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch)
-        return res.status(400).json({ msg: 'Authentification failed' });
+        res
+          .status(400)
+          .json({ data: req.body, message: 'Authentification failed' });
 
       const accessToken = await createAccessToken({
         username: user.username,
@@ -84,8 +86,9 @@ class authController {
       });
 
       res.json({ accessToken });
-    } catch (err) {
-      return res.status(500).json({ message: err });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ data: req.body, error: error.message });
     }
   }
 }
