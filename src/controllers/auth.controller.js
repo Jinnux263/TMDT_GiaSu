@@ -60,16 +60,20 @@ class authController {
         username,
       });
       console.log(user);
-      if (!user)
+      if (!user) {
         res
           .status(500)
           .json({ data: req.body, message: 'Authentification failed' });
+        return;
+      }
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch)
+      if (!isMatch) {
         res
           .status(400)
           .json({ data: req.body, message: 'Authentification failed' });
+        return;
+      }
 
       const accessToken = await createAccessToken({
         username: user.username,
