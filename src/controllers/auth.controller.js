@@ -63,11 +63,14 @@ class authController {
           const tutor = new Tutors(data);
           await tutor.save(function (err) {
             if (!err) {
-              res.send('Sign up successfully!');
-              return;
+              return res
+                .status(200)
+                .jsonp({ data: tutor, message: 'Sign up successfully!' });
+              // res.send('Sign up successfully!');
             } else {
-              res.status(500).jsonp({ data: req.body, error: err.message });
-              return;
+              return res
+                .status(500)
+                .jsonp({ data: req.body, error: err.message });
             }
           });
         } else if (newUser?.role == 'customer') {
@@ -77,8 +80,9 @@ class authController {
           });
           await customer.save(function (err) {
             if (!err) {
-              res.send('Sign up successfully!');
-              return;
+              return res
+                .status(200)
+                .jsonp({ data: customer, message: 'Sign up successfully!' });
             } else {
               res.status(500).jsonp({ data: req.body, error: err.message });
               return;
