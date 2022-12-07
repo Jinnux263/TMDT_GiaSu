@@ -63,7 +63,7 @@ class authController {
           const tutor = new Tutors(data);
           await tutor.save(function (err) {
             if (!err) {
-              res.redirect('http://localhost:3000/login');
+              res.send('Sign up successfully!');
               return;
             } else {
               res.status(500).jsonp({ data: req.body, error: err.message });
@@ -77,7 +77,7 @@ class authController {
           });
           await customer.save(function (err) {
             if (!err) {
-              res.redirect('http://localhost:3000/login');
+              res.send('Sign up successfully!');
               return;
             } else {
               res.status(500).jsonp({ data: req.body, error: err.message });
