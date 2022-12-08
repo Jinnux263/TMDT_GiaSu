@@ -11,6 +11,8 @@ router.post('/', auth, (req, res) =>
 
 router.get('/', auth, TransactionController.getAllTransactions);
 
+router.get('/bill-infor', TransactionController.getBillPaymentMethod);
+
 router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
 router.get(
