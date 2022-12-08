@@ -167,6 +167,16 @@ class CourseController {
         course: courseId,
         status: 'Pending',
       });
+
+      // begin module email
+      const tutorAccepted = tutorCourse.populate('tutor');
+      const infoAccepted = tutorAccepted.tutor.populate('user');
+      const emailAccepted = infoAccepted.email;
+      const subjectSuccess = 'THÔNG BÁO NHẬN LỚP GIA SƯ';
+      const mailConfig = await MailConfig.findOne({ type: 3 });
+      await SendNormalMail(emailAccepted, mailConfig.content, subjectSuccess);
+      // end module email
+
       if (!tutorCourse) {
         res.status(400).json({
           data: { tutorId, courseId },
@@ -179,12 +189,20 @@ class CourseController {
         course: courseId,
         tutor: { $ne: tutorId },
       });
-      console.log('other', otherTutorCourses);
+
+      const subjectReject = 'THÔNG BÁO NHẬN LỚP';
+      const mailConfigMail = await MailConfig.findOne({ type: 2 });
+      otherTutorCourses.map(async item => {
+        const tutor = item.populate('tutor');
+        const userTutor = tutor.tutor.populate('user');
+        const emailTutor = userTutor.user.email;
+        await SendNormalMail(emailTutor, mailConfigMail.content, subjectReject)
+      })
+      // console.log('other', otherTutorCourses);
       await tutorCourseModel.updateMany(
         { course: courseId, tutor: { $ne: tutorId } },
         { $set: { status: 'Reject' } },
       );
-
       await tutorCourse.save();
       res
         .status(200)
