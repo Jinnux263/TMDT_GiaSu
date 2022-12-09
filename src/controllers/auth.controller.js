@@ -102,7 +102,7 @@ class authController {
           .status(500)
           .json({ data: req.body, message: 'Authentification failed' });
       }
-      var user = await User.findOne({
+      const user = await User.findOne({
         username,
       });
       if (!user) {
@@ -134,8 +134,32 @@ class authController {
         path: '/user/refresh_token',
         httpOnly: true,
       });
-
-      res.json({ user: user, accessToken });
+      if (user?.role === 'tutor') {
+        const dataOfTutor = await Tutors.findOne({ user: user._id });
+        const newUser = {
+          _id: user._id,
+          username: user.username,
+          password: user.password,
+          email: user.email,
+          address: user.address,
+          fullname: user.fullname,
+          role: user.role,
+          gender: user.gender,
+          phone_number: user.phone_number,
+          dob: user.dob,
+          balance: user.balance,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          __v: user.__v,
+          verified: dataOfTutor.verified,
+        };
+        res.json({
+          user: newUser,
+          accessToken,
+        });
+      } else {
+        res.json({ user: user, accessToken });
+      }
     } catch (error) {
       res.status(500).json({ data: req.body, error: error.message });
     }
