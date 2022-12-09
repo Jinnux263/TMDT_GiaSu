@@ -26,7 +26,7 @@ const SendMailGiaSu = async (recipent, content, subject) => {
                 if (errorCallback) errorCallback(error);
                 reject(error);
             } else {
-                console.log('Send mail to ' + 'cong.vupt1812@hcmut.edu.vn' + ' successful.');
+                console.log('Send mail to ' + recipent + ' successful.');
                 if (successCallback) successCallback();
                 resolve();
             }
