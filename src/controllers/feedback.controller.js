@@ -10,7 +10,7 @@ class FeedbackController {
       if (!tutor) {
         res.status(404).json({ data: req.params, message: 'Tutor not found' });
       }
-      let feedbacks = await feedbackModel
+      const feedbacks = await feedbackModel
         .find({
           tutor: tutorId,
         })
@@ -43,9 +43,9 @@ class FeedbackController {
       }
       let feedback = new feedbackModel({
         description: data.description,
-        customer,
-        course,
-        tutor,
+        customer: data.customerId,
+        course: data.courseId,
+        tutor: data.tutorId,
       });
       await feedback.save();
       //   await feedbackModel.create(data);
