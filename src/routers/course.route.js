@@ -14,7 +14,7 @@ router.post('/create-multiple', courseController.createMultipleCourse);
 router.get('/get-list-course', courseController.getListCourse);
 
 router.get('/get-open-course', courseController.getOpenCourse);
-
+router.patch('/:courseId/cancel', courseController.cancelCourse);
 router.delete(
   '/delete-course-by-customer',
   courseController.customerDeleteCourse,
