@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Customer = require('../models/customer.model');
 const Course = require('../models/course.model');
-
+const SendMailGiaSu = require('../controllers/mail.controller');
 router.get('/:customerId', async (req, res) => {
   try {
     const customerId = req.params.customerId;
@@ -52,6 +52,11 @@ router.put('/sua-thong-tin-lop', async (req, res) => {
   } catch (error) {
     res.status(500).json(error.message);
   }
+});
+
+router.get('/test/api', async (req, res) => {
+  await SendMailGiaSu('cong.vupt1812@hcmut.edu.vn', 'hihi', 'Mailtest');
+  res.send({});
 });
 
 module.exports = router;

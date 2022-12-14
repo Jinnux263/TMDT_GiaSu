@@ -1,7 +1,11 @@
 const courseModel = require('../models/course.model');
 const customerModel = require('../models/customer.model');
+const userModel = require('../models/user.model')
 const tutorCourseModel = require('../models/tutor_course.model');
 const tutorModel = require('../models/tutor.model');
+const SendNormalMail = require('./mail.controller')
+const MailConfig = require('../models/mailSettings.model');
+
 class CourseController {
   async getAllCourse(req, res) {
     try {
@@ -101,12 +105,28 @@ class CourseController {
     try {
       const { tutorId } = req.body;
       const courseId = req.params.courseId;
-      const tutor = await tutorModel.findOne({ _id: tutorId });
+      const tutor = await tutorModel
+        .findOne({ _id: tutorId })
+        .populate(['user']);
       if (!tutor) {
         res.status(400).json({ data: req.body, message: 'Tutor not found' });
         return;
       }
-      const course = await courseModel.findOne({ _id: courseId });
+      const course = await courseModel
+        .findOne({ _id: courseId }) // apply course -> có gia sư mới apply vào.
+        .populate(['customer']);
+
+      // Module SendMail
+
+      // Begin
+      const userCustomer = await course.customer.populate('user');
+      const emailRecipent = userCustomer.user.email;
+      const mailConfig = await MailConfig.findOne({ type: 1 });
+      const subject = 'THÔNG BÁO TÌNH TRẠNG LỚP TRÊN HỆ THỐNG GIA SƯ BÁCH KHOA';
+      let content = mailConfig.content.replace('{name}', tutor.user.fullname)
+      await SendNormalMail(emailRecipent, content, subject);
+      // End
+
       if (!course) {
         res.status(400).json({ data: req.body, message: 'Course not found' });
         return;
@@ -142,11 +162,21 @@ class CourseController {
           .json({ data: { tutorId, courseId }, message: 'Course not found' });
         return;
       }
-      const tutorCourse = await tutorCourseModel.findOne({
+      const tutorCourse = await tutorCourseModel.findOne({ // accept Gs
         tutor: tutorId,
         course: courseId,
         status: 'Pending',
       });
+
+      // begin module email
+      const tutorAccepted = await tutorCourse.populate('tutor');
+      const infoAccepted = await tutorAccepted.tutor.populate('user');
+      const emailAccepted = infoAccepted.user.email;
+      const subjectSuccess = 'THÔNG BÁO NHẬN LỚP GIA SƯ';
+      const mailConfig = await MailConfig.findOne({ type: 3 });
+      await SendNormalMail(emailAccepted, mailConfig.content, subjectSuccess);
+      // end module email
+
       if (!tutorCourse) {
         res.status(400).json({
           data: { tutorId, courseId },
@@ -155,11 +185,20 @@ class CourseController {
         return;
       }
       tutorCourse.status = 'Ongoing';
-      let otherTutorCourses = await tutorCourseModel.find({
+      let otherTutorCourses = await tutorCourseModel.find({ // List reject
         course: courseId,
         tutor: { $ne: tutorId },
       });
-      console.log('other', otherTutorCourses);
+
+      const subjectReject = 'THÔNG BÁO NHẬN LỚP';
+      const mailConfigMail = await MailConfig.findOne({ type: 2 });
+      otherTutorCourses.map(async item => {
+        const tutor = await item.populate('tutor');
+        const userTutor = await tutor.tutor.populate('user');
+        const emailTutor = userTutor.user.email;
+        await SendNormalMail(emailTutor, mailConfigMail.content, subjectReject)
+      })
+
       await tutorCourseModel.updateMany(
         { course: courseId, tutor: { $ne: tutorId } },
         { $set: { status: 'Reject' } },
@@ -175,6 +214,7 @@ class CourseController {
       });
     }
   }
+
 }
 
 module.exports = new CourseController();

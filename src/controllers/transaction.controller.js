@@ -1,5 +1,7 @@
 const UserModel = require('../models/user.model');
 const TransactionModel = require('../models/transaction.model');
+const generateMoMoPayment = require('../service/Momo');
+const axios = require('axios');
 
 function isNumeric(str) {
   if (typeof str != 'string') return false;
@@ -219,6 +221,24 @@ class Transaction {
       res.status(500).json({ data: req.params, message: error.message });
     }
   }
+
+  async getBillPaymentMethod(req, res) {
+    const amount = req.body.amount;
+    const MoMoPayment = generateMoMoPayment(amount);
+    try {
+      const result = await axios.post(
+        'https://test-payment.momo.vn/v2/gateway/api/create',
+        MoMoPayment,
+      );
+
+      res.send(result.data);
+    } catch (error) {
+      // console.log('ERR: ', error.message);
+      res.status(500).json({ message: error.message });
+    }
+    // res.json(momoBill);
+  }
+
   // Todo: Chi lam trong truong hop admin muon chinh sua he thong
   // async deleteTransaction(req, res) {
   //   // Todo: Chua lam
