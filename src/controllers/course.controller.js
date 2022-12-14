@@ -217,9 +217,10 @@ class CourseController {
         { $set: { status: 'Reject' } },
       );
       await tutorCourse.save();
+      const tutorCourses = await tutorCourseModel.find({ course: courseId });
       res
         .status(200)
-        .json({ data: { tutorId, courseId }, message: 'Accept Tutor success' });
+        .json({ data: tutorCourses, message: 'Accept Tutor success' });
     } catch (error) {
       res.status(500).json({
         data: { tutorId: req.body.tutorId, courseId: req.params.courseId },
