@@ -20,7 +20,13 @@ const courseSchema = mongoose.Schema(
             ref: "Grade"
         },
         description: reqString,
-        status: reqString,
+        // status: reqString,
+        status: {
+            type: String,
+            enum: ['OPEN', 'FINISH', 'ONGOING'],
+            default: 'OPEN',
+            required: true,
+        },
         deadline: Date,
         salary: reqNumber,
         numberOfStudent: reqNumber,
