@@ -14,7 +14,6 @@ const feedbackSchema = new mongoose.Schema(
       type: String,
       ref: 'Course',
     },
-    rate: Number,
     description: String,
   },
   { timestamps: true },

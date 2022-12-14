@@ -30,6 +30,7 @@ app.use('/customer', require('./src/routers/customer.route'));
 app.use('/course', require('./src/routers/course.route'));
 app.use('/tutor', require('./src/routers/tutor.route'));
 app.use('/transaction', require('./src/routers/transaction.route'));
+app.use('/feedback', require('./src/routers/feedback.route'));
 app.use('/', require('./src/routers/auth.route'));
 
 app.listen(PORT, () => {

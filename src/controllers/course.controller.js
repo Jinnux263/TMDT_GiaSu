@@ -1,10 +1,11 @@
 const courseModel = require('../models/course.model');
 const customerModel = require('../models/customer.model');
-const userModel = require('../models/user.model')
+const userModel = require('../models/user.model');
 const tutorCourseModel = require('../models/tutor_course.model');
 const tutorModel = require('../models/tutor.model');
-const SendNormalMail = require('./mail.controller')
+const SendNormalMail = require('./mail.controller');
 const MailConfig = require('../models/mailSettings.model');
+const { populate } = require('../models/course.model');
 
 class CourseController {
   async getAllCourse(req, res) {
@@ -95,10 +96,20 @@ class CourseController {
         .find({
           course: courseId,
         })
-        .populate('tutor');
+        .populate('tutor')
+        .populate({
+          path: 'tutor',
+          populate: {
+            path: 'user',
+            model: 'User',
+          },
+        });
       res.status(200).json(tutorCourses);
     } catch (error) {
-      res.status(500).json({ data: { courseId: req.params.courseId } });
+      res.status(500).json({
+        data: { courseId: req.params.courseId },
+        message: error.message,
+      });
     }
   }
   async tutorApply(req, res) {
@@ -123,7 +134,7 @@ class CourseController {
       const emailRecipent = userCustomer.user.email;
       const mailConfig = await MailConfig.findOne({ type: 1 });
       const subject = 'THÔNG BÁO TÌNH TRẠNG LỚP TRÊN HỆ THỐNG GIA SƯ BÁCH KHOA';
-      let content = mailConfig.content.replace('{name}', tutor.user.fullname)
+      let content = mailConfig.content.replace('{name}', tutor.user.fullname);
       await SendNormalMail(emailRecipent, content, subject);
       // End
 
@@ -162,7 +173,8 @@ class CourseController {
           .json({ data: { tutorId, courseId }, message: 'Course not found' });
         return;
       }
-      const tutorCourse = await tutorCourseModel.findOne({ // accept Gs
+      const tutorCourse = await tutorCourseModel.findOne({
+        // accept Gs
         tutor: tutorId,
         course: courseId,
         status: 'Pending',
@@ -185,28 +197,30 @@ class CourseController {
         return;
       }
       tutorCourse.status = 'Ongoing';
-      let otherTutorCourses = await tutorCourseModel.find({ // List reject
+      let otherTutorCourses = await tutorCourseModel.find({
+        // List reject
         course: courseId,
         tutor: { $ne: tutorId },
       });
 
       const subjectReject = 'THÔNG BÁO NHẬN LỚP';
       const mailConfigMail = await MailConfig.findOne({ type: 2 });
-      otherTutorCourses.map(async item => {
+      otherTutorCourses.map(async (item) => {
         const tutor = await item.populate('tutor');
         const userTutor = await tutor.tutor.populate('user');
         const emailTutor = userTutor.user.email;
-        await SendNormalMail(emailTutor, mailConfigMail.content, subjectReject)
-      })
+        await SendNormalMail(emailTutor, mailConfigMail.content, subjectReject);
+      });
 
       await tutorCourseModel.updateMany(
         { course: courseId, tutor: { $ne: tutorId } },
         { $set: { status: 'Reject' } },
       );
       await tutorCourse.save();
+      const tutorCourses = await tutorCourseModel.find({ course: courseId });
       res
         .status(200)
-        .json({ data: { tutorId, courseId }, message: 'Accept Tutor success' });
+        .json({ data: tutorCourses, message: 'Accept Tutor success' });
     } catch (error) {
       res.status(500).json({
         data: { tutorId: req.body.tutorId, courseId: req.params.courseId },
@@ -214,7 +228,6 @@ class CourseController {
       });
     }
   }
-
 }
 
 module.exports = new CourseController();
