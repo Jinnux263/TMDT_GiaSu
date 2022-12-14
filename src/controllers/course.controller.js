@@ -20,15 +20,28 @@ class CourseController {
   async createCourse(req, res) {
     try {
       const data = req.body;
-      const course = await courseModel.create(data);
       const customer = await customerModel.findOne({ _id: data.customer });
+      const curCourses = await courseModel.find({
+        customer: data.customer,
+        status: { $ne: 'FINISH' },
+      });
+      let usedBalance = 0;
+      curCourses.forEach((element) => {
+        usedBalance += element.salary;
+      });
+      if (customer.balance < usedBalance + data.salary) {
+        return res
+          .status(400)
+          .json({ data: data, message: 'Not enough in balance' });
+      }
       await customerModel.findOneAndUpdate(
         { _id: data.customer },
         { number_of_course: customer.number_of_course + 1 },
       );
-      res.status(201).json(course);
+      const course = await courseModel.create(data);
+      res.status(201).json({ data: course, message: 'New course created' });
     } catch (error) {
-      res.status(500).json(error.message);
+      res.status(500).json({ data: req.body, message: error.message });
     }
   }
 
@@ -69,7 +82,30 @@ class CourseController {
         .send({ data: 'error', message: 'Lỗi ở API /course/get-open-course' });
     }
   }
-
+  async cancelCourse(req, res) {
+    try {
+      const { courseId } = req.params;
+      const courseToCancel = await courseModel
+        .findById(courseId)
+        .populate('subjects grade');
+      if (!courseToCancel) {
+        return res
+          .status(404)
+          .json({ data: req.params, message: 'Course not found' });
+      }
+      await tutorCourseModel.updateMany(
+        { course: courseId },
+        { $set: { status: 'Reject' } },
+      );
+      courseToCancel.status = 'CANCEL';
+      await courseToCancel.save();
+      return res
+        .status(200)
+        .json({ data: courseToCancel, message: 'Course cancelled' });
+    } catch (error) {
+      res.status(500).send({ data: req.params, message: error.message });
+    }
+  }
   async customerDeleteCourse(req, res) {
     try {
       const { _id, customer } = req.body.data;
@@ -196,7 +232,6 @@ class CourseController {
         });
         return;
       }
-      tutorCourse.status = 'Ongoing';
       let otherTutorCourses = await tutorCourseModel.find({
         // List reject
         course: courseId,
@@ -216,6 +251,9 @@ class CourseController {
         { course: courseId, tutor: { $ne: tutorId } },
         { $set: { status: 'Reject' } },
       );
+      tutorCourse.status = 'Ongoing';
+      course.status = 'ONGOING';
+      await course.save();
       await tutorCourse.save();
       const tutorCourses = await tutorCourseModel.find({ course: courseId });
       res
