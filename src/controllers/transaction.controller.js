@@ -256,7 +256,7 @@ class Transaction {
   //   }
   // }
   async ipnHandler(req, res) {
-    console.log(req.body);
+    console.log('Momo payload return: ', req.body);
     res.status(204);
   }
 }
