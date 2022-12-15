@@ -69,17 +69,25 @@ class CourseController {
 
   async getOpenCourse(req, res) {
     try {
-      const courseOpen = await courseModel
+      const { tutorId } = req.query;
+      let courseOpen = await courseModel
         .find({ status: 'OPEN' })
         .populate('subjects')
         .populate('grade')
         .populate('customer');
-
-      res.status(200).send(courseOpen);
-    } catch (error) {
+      let tutorCourse = await tutorCourseModel.find({ tutor: tutorId });
+      tutorCourse = tutorCourse.map((ele) => ele.course);
+      let filteredCourseOpen = courseOpen.filter((course) => {
+        return tutorCourse.includes(course._id.toString());
+      });
       res
-        .status(500)
-        .send({ data: 'error', message: 'Lỗi ở API /course/get-open-course' });
+        .status(200)
+        .json({ data: filteredCourseOpen, message: 'Get open courses' });
+    } catch (error) {
+      res.status(500).json({
+        data: req.query,
+        message: error.message,
+      });
     }
   }
   async cancelCourse(req, res) {
