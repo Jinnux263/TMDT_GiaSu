@@ -10,7 +10,8 @@ const { populate } = require('../models/course.model');
 class CourseController {
   async getAllCourse(req, res) {
     try {
-      let courses = await courseModel.find({});
+      data = req.query;
+      let courses = await courseModel.find(data);
       res.status(200).send(courses);
     } catch (error) {
       res.status(500).json(error.message);
@@ -69,12 +70,22 @@ class CourseController {
 
   async getOpenCourse(req, res) {
     try {
-      const { tutorId } = req.query;
+      const { tutorId, subject, grade, minSalary } = req.body;
       let courseOpen = await courseModel
-        .find({ status: 'OPEN' })
+        .find({
+          status: 'OPEN',
+        })
         .populate('subjects')
         .populate('grade')
         .populate('customer');
+      courseOpen = courseOpen.filter((course) => {
+        let checkSubject = subject
+          ? course.subjects.map((s) => s._id.toString()).includes(subject)
+          : true;
+        let checkGrade = grade ? course.grade._id.toString() == grade : true;
+        let checkSalary = minSalary ? course.salary >= minSalary : true;
+        return checkSubject && checkGrade && checkSalary;
+      });
       let tutorCourse = await tutorCourseModel.find({ tutor: tutorId });
       tutorCourse = tutorCourse.map((ele) => ele.course);
       let filteredCourseOpen = courseOpen.filter((course) => {
