@@ -296,6 +296,14 @@ class Transaction {
       _id: transaction.source,
     });
 
+    const newTransaction = new TransactionModel({
+      transactionType: 'Deposit',
+      source: transaction.source,
+      destination: transaction.destination,
+      amount: transaction.amount,
+    });
+    await newTransaction.save();
+
     user.balance += parseInt(req.body.amount);
     const result = await user.save();
   }
