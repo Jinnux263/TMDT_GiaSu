@@ -13,7 +13,7 @@ router.get('/', auth, TransactionController.getAllTransactions);
 
 router.get('/ipn', TransactionController.ipnHandler);
 
-router.get('/bill-infor', auth, TransactionController.getBillPaymentMethod);
+router.post('/bill-infor', auth, TransactionController.getBillPaymentMethod);
 
 router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
