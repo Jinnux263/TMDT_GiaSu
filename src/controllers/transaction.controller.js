@@ -8,7 +8,39 @@ function isNumeric(str) {
   return !isNaN(str) && !isNaN(parseFloat(str));
 }
 class Transaction {
-  // Todo: hien thuc ba loai giao dich o day
+  async order(req, res) {
+    // Chekc destination
+    const { desUserId } = req.body;
+    if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.params,
+        message: 'there is no user with id ' + desUserId,
+      });
+    }
+
+    // Tim user de kiem tra lai
+    const user = await UserModel.findOne({
+      _id: desUserId,
+    });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ data: req.params, message: 'user not found' });
+    }
+
+    // Luu giao dich, cap nhat so du
+    if (!isNumeric(req.body.amount)) {
+      return res
+        .status(500)
+        .json({ data: req.body, message: 'amount must be a number' });
+    }
+    user.balance += parseInt(req.body.amount);
+    const result = await user.save();
+    return res
+      .status(500)
+      .json({ data: result, message: 'Deposit successfully' });
+  }
+
   async deposit(req, res) {
     // Chekc destination
     const { desUserId } = req.body;
@@ -135,6 +167,8 @@ class Transaction {
         return this.withdrawal(req, res);
       } else if (transactionDto.type === 'Payment') {
         return this.makePayment(req, res);
+      } else if (transactionDto.type === 'Order') {
+        return this.order(req, res);
       } else {
         return res.status(500).json({
           data: transactionDto,
@@ -158,8 +192,9 @@ class Transaction {
         });
       }
 
-      var transaction = await TransactionModel.findOne({
+      let transaction = await TransactionModel.findOne({
         _id: transactionId,
+        transactionType: 'Deposit' | 'Withdrawal' | 'Payment',
       });
       if (!transaction) {
         return res
@@ -173,7 +208,9 @@ class Transaction {
   }
   async getAllTransactions(req, res) {
     try {
-      let transactions = await TransactionModel.find({});
+      let transactions = await TransactionModel.find({
+        transactionType: 'Deposit' | 'Withdrawal' | 'Payment',
+      });
       res.status(200).send(
         transactions.map((transaction) => {
           return transactions.populate('_id');
@@ -192,7 +229,7 @@ class Transaction {
           message: 'there is no user with id ' + userId,
         });
       }
-      var user = await UserModel.findOne({
+      let user = await UserModel.findOne({
         _id: userId,
       });
       if (!user) {
@@ -201,10 +238,10 @@ class Transaction {
           .json({ data: req.params, message: 'user not found' });
       }
 
-      // Todo: Tim transaction bang user id
-      var transactions = await TransactionModel.find({
+      let transactions = await TransactionModel.find({
         source: user._id,
         desination: user._id,
+        transactionType: 'Deposit' | 'Withdrawal' | 'Payment',
       });
 
       if (!transactions) {
@@ -221,10 +258,22 @@ class Transaction {
       res.status(500).json({ data: req.params, message: error.message });
     }
   }
+  async createOrder(source, amount) {
+    const newOrder = new TransactionModel({
+      transactionType: 'Order',
+      source,
+      destination: source,
+      amount,
+    });
+    const res = await newOrder.save(function (err) {});
+    return newOrder.id;
+  }
 
   async getBillPaymentMethod(req, res) {
     const amount = req.body.amount;
-    const MoMoPayment = generateMoMoPayment(amount);
+    const user = await UserModel.find({ username: user.username });
+    const orderId = await this.createOrder(user.id, amount);
+    const MoMoPayment = generateMoMoPayment(orderId, amount);
     try {
       const result = await axios.post(
         'https://test-payment.momo.vn/v2/gateway/api/create',
@@ -233,31 +282,31 @@ class Transaction {
 
       res.send(result.data);
     } catch (error) {
-      // console.log('ERR: ', error.message);
       res.status(500).json({ message: error.message });
     }
-    // res.json(momoBill);
   }
 
-  // Todo: Chi lam trong truong hop admin muon chinh sua he thong
-  // async deleteTransaction(req, res) {
-  //   // Todo: Chua lam
-  //   try {
-  //     const { _id, transaction } = req.body.data;
-  //     const transactionToDelete = await TransactionModel.findOneAndDelete({
-  //       _id,
-  //       transaction,
-  //     });
-  //     res.status(200).send({ courseToDelete: transactionToDelete });
-  //   } catch (error) {
-  //     res
-  //       .status(500)
-  //       .send({ data: 'error', message: 'Lỗi ở API /transaction/delete' });
-  //   }
-  // }
   async ipnHandler(req, res) {
-    console.log(req.body);
     res.status(204);
+    const transaction = await TransactionModel.findOne({
+      _id: req.body.requestId,
+      transactionType: 'Order',
+    });
+
+    const user = await UserModel.findOne({
+      _id: transaction.source,
+    });
+
+    const newTransaction = new TransactionModel({
+      transactionType: 'Deposit',
+      source: transaction.source,
+      destination: transaction.destination,
+      amount: transaction.amount,
+    });
+    await newTransaction.save();
+
+    user.balance += parseInt(req.body.amount);
+    const result = await user.save();
   }
 }
 module.exports = new Transaction();

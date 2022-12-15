@@ -11,9 +11,11 @@ router.post('/', auth, (req, res) =>
 
 router.get('/', auth, TransactionController.getAllTransactions);
 
-router.get('/ipn', TransactionController.ipnHandler);
+router.post('/ipn', TransactionController.ipnHandler);
 
-router.post('/bill-infor', auth, TransactionController.getBillPaymentMethod);
+router.post('/bill-infor', auth, (req, res) => {
+  TransactionController.getBillPaymentMethod(req, res);
+});
 
 router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
