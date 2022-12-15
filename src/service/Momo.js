@@ -2,7 +2,8 @@ const crypto = require('crypto');
 
 const generateMoMoPayment = (
   amountInput,
-  ipnUrlInput = 'https://callback.url/notify',
+  redirectUrl = 'http://localhost:8797',
+  ipnUrlInput = 'https://tmdtgiasu-production.up.railway.app/transaction/ipn',
 ) => {
   const partnerCode = 'MOMO';
   const accessKey = 'F8BBA842ECF85';
@@ -10,8 +11,8 @@ const generateMoMoPayment = (
   const requestId = partnerCode + new Date().getTime();
   const orderId = requestId;
   const orderInfo = 'pay with MoMo';
-  const redirectUrl = 'https://momo.vn/return';
-  const ipnUrl = ipnUrlInput || 'http://localhost:8797/transaction/ipn';
+  const redirectUrl = redirectUrl;
+  const ipnUrl = ipnUrlInput;
   const amount = String(amountInput) || '50000';
   const requestType = 'captureWallet';
   const extraData = ''; //pass empty value if your merchant does not have stores
