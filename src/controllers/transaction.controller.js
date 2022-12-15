@@ -289,7 +289,7 @@ class Transaction {
   async ipnHandler(req, res) {
     res.status(204);
     const transaction = await TransactionModel.findOne({
-      _id: req.body.requestId,
+      _id: req.body.orderId,
       transactionType: 'Order',
     });
 
@@ -300,12 +300,10 @@ class Transaction {
       amount: transaction.amount,
     });
     await newTransaction.save();
-    console.log(newTransaction);
 
     const user = await UserModel.findOne({
       _id: transaction.source,
     });
-    console.log(user);
     user.balance += parseInt(req.body.amount);
     const result = await user.save();
   }
