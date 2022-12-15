@@ -293,10 +293,6 @@ class Transaction {
       transactionType: 'Order',
     });
 
-    const user = await UserModel.findOne({
-      _id: transaction.source,
-    });
-
     const newTransaction = new TransactionModel({
       transactionType: 'Deposit',
       source: transaction.source,
@@ -304,7 +300,12 @@ class Transaction {
       amount: transaction.amount,
     });
     await newTransaction.save();
+    console.log(newTransaction);
 
+    const user = await UserModel.findOne({
+      _id: transaction.source,
+    });
+    console.log(user);
     user.balance += parseInt(req.body.amount);
     const result = await user.save();
   }
