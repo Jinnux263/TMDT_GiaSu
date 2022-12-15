@@ -160,9 +160,29 @@ class CourseController {
         return;
       }
       const course = await courseModel
-        .findOne({ _id: courseId }) // apply course -> có gia sư mới apply vào.
+        .findOne({ _id: courseId, status: 'OPEN' }) // apply course -> có gia sư mới apply vào.
         .populate(['customer']);
 
+      if (!course) {
+        res.status(400).json({ data: req.body, message: 'Course not found' });
+        return;
+      }
+      let appliedCount = await tutorCourseModel.countDocuments({
+        tutor: tutorId,
+        course: courseId,
+      });
+      if (appliedCount > 0) {
+        return res.status(400).json({
+          data: req.body,
+          message: 'Tutor have already apply to this course',
+        });
+      }
+
+      const tutorCourse = new tutorCourseModel({
+        tutor: tutorId,
+        course: courseId,
+        status: 'Pending',
+      });
       // Module SendMail
 
       // Begin
@@ -173,16 +193,6 @@ class CourseController {
       let content = mailConfig.content.replace('{name}', tutor.user.fullname);
       await SendNormalMail(emailRecipent, content, subject);
       // End
-
-      if (!course) {
-        res.status(400).json({ data: req.body, message: 'Course not found' });
-        return;
-      }
-      const tutorCourse = new tutorCourseModel({
-        tutor: tutorId,
-        course: courseId,
-        status: 'Pending',
-      });
       tutorCourse.save((err) => {
         if (!err) res.status(201).json(tutorCourse);
         else res.status(400).json({ data: req.body, message: err.message });
