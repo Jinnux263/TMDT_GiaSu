@@ -261,7 +261,7 @@ class Transaction {
   async createOrder(source, amount) {
     const newOrder = new TransactionModel({
       transactionType: 'Order',
-      source,
+      source: source,
       destination: source,
       amount,
     });
@@ -271,8 +271,8 @@ class Transaction {
 
   async getBillPaymentMethod(req, res) {
     const amount = req.body.amount;
-    const user = await UserModel.find({ username: user.username });
-    const orderId = await this.createOrder(user.id, amount);
+    const checkUser = await UserModel.findOne({ username: req.user.username });
+    const orderId = await this.createOrder(checkUser.id, amount);
     const MoMoPayment = generateMoMoPayment(orderId, amount);
     try {
       const result = await axios.post(
