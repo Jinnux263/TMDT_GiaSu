@@ -255,5 +255,9 @@ class Transaction {
   //       .send({ data: 'error', message: 'Lỗi ở API /transaction/delete' });
   //   }
   // }
+  async ipnHandler(req, res) {
+    console.log(req.body);
+    res.status(204);
+  }
 }
 module.exports = new Transaction();
