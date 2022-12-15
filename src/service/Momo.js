@@ -2,7 +2,7 @@ const crypto = require('crypto');
 
 const generateMoMoPayment = (
   amountInput,
-  redirectUrl = 'http://localhost:8797',
+  redirectUrlInput = 'http://localhost:8797',
   ipnUrlInput = 'https://tmdtgiasu-production.up.railway.app/transaction/ipn',
 ) => {
   const partnerCode = 'MOMO';
@@ -11,7 +11,7 @@ const generateMoMoPayment = (
   const requestId = partnerCode + new Date().getTime();
   const orderId = requestId;
   const orderInfo = 'pay with MoMo';
-  const redirectUrl = redirectUrl;
+  const redirectUrl = redirectUrlInput;
   const ipnUrl = ipnUrlInput;
   const amount = String(amountInput) || '50000';
   const requestType = 'captureWallet';
