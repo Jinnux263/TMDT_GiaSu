@@ -89,7 +89,7 @@ class CourseController {
       let tutorCourse = await tutorCourseModel.find({ tutor: tutorId });
       tutorCourse = tutorCourse.map((ele) => ele.course);
       let filteredCourseOpen = courseOpen.filter((course) => {
-        return tutorCourse.includes(course._id.toString());
+        return !tutorCourse.includes(course._id.toString());
       });
       res
         .status(200)
