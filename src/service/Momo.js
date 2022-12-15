@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 
 const generateMoMoPayment = (
+  orderIdInput,
   amountInput,
   redirectUrlInput = 'http://localhost:8797',
   ipnUrlInput = 'https://tmdtgiasu-production.up.railway.app/transaction/ipn',
@@ -9,7 +10,7 @@ const generateMoMoPayment = (
   const accessKey = 'F8BBA842ECF85';
   const secretkey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
   const requestId = partnerCode + new Date().getTime();
-  const orderId = requestId;
+  const orderId = orderIdInput;
   const orderInfo = 'pay with MoMo';
   const redirectUrl = redirectUrlInput;
   const ipnUrl = ipnUrlInput;
