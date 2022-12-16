@@ -8,75 +8,75 @@ function isNumeric(str) {
   return !isNaN(str) && !isNaN(parseFloat(str));
 }
 class Transaction {
-  async order(req, res) {
-    // Chekc destination
-    const { desUserId } = req.body;
-    if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(404).json({
-        data: req.params,
-        message: 'there is no user with id ' + desUserId,
-      });
-    }
+  // async order(req, res) {
+  //   // Chekc destination
+  //   const { desUserId } = req.body;
+  //   if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
+  //     return res.status(404).json({
+  //       data: req.params,
+  //       message: 'there is no user with id ' + desUserId,
+  //     });
+  //   }
 
-    // Tim user de kiem tra lai
-    const user = await UserModel.findOne({
-      _id: desUserId,
-    });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ data: req.params, message: 'user not found' });
-    }
+  //   // Tim user de kiem tra lai
+  //   const user = await UserModel.findOne({
+  //     _id: desUserId,
+  //   });
+  //   if (!user) {
+  //     return res
+  //       .status(404)
+  //       .json({ data: req.params, message: 'user not found' });
+  //   }
 
-    // Luu giao dich, cap nhat so du
-    if (!isNumeric(req.body.amount)) {
-      return res
-        .status(500)
-        .json({ data: req.body, message: 'amount must be a number' });
-    }
-    user.balance += parseInt(req.body.amount);
-    const result = await user.save();
-    return res
-      .status(500)
-      .json({ data: result, message: 'Deposit successfully' });
-  }
+  //   // Luu giao dich, cap nhat so du
+  //   if (!isNumeric(req.body.amount)) {
+  //     return res
+  //       .status(500)
+  //       .json({ data: req.body, message: 'amount must be a number' });
+  //   }
+  //   user.balance += parseInt(req.body.amount);
+  //   const result = await user.save();
+  //   return res
+  //     .status(500)
+  //     .json({ data: result, message: 'Deposit successfully' });
+  // }
 
-  async deposit(req, res) {
-    // Chekc destination
-    const { desUserId } = req.body;
-    if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(404).json({
-        data: req.params,
-        message: 'there is no user with id ' + desUserId,
-      });
-    }
+  // async deposit(req, res) {
+  //   // Chekc destination
+  //   const { desUserId } = req.body;
+  //   if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
+  //     return res.status(404).json({
+  //       data: req.params,
+  //       message: 'there is no user with id ' + desUserId,
+  //     });
+  //   }
 
-    // Tim user de kiem tra lai
-    const user = await UserModel.findOne({
-      _id: desUserId,
-    });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ data: req.params, message: 'user not found' });
-    }
+  //   // Tim user de kiem tra lai
+  //   const user = await UserModel.findOne({
+  //     _id: desUserId,
+  //   });
+  //   if (!user) {
+  //     return res
+  //       .status(404)
+  //       .json({ data: req.params, message: 'user not found' });
+  //   }
 
-    // Luu giao dich, cap nhat so du
-    if (!isNumeric(req.body.amount)) {
-      return res
-        .status(500)
-        .json({ data: req.body, message: 'amount must be a number' });
-    }
-    user.balance += parseInt(req.body.amount);
-    const result = await user.save();
-    return res
-      .status(500)
-      .json({ data: result, message: 'Deposit successfully' });
-  }
+  //   // Luu giao dich, cap nhat so du
+  //   if (!isNumeric(req.body.amount)) {
+  //     return res
+  //       .status(500)
+  //       .json({ data: req.body, message: 'amount must be a number' });
+  //   }
+  //   user.balance += parseInt(req.body.amount);
+  //   const result = await user.save();
+  //   return res
+  //     .status(500)
+  //     .json({ data: result, message: 'Deposit successfully' });
+  // }
 
   async withdrawal(req, res) {
     // User nay la destination
-    const { srcUserId } = req.body;
+    const { source: srcUserId } = req.body;
     if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
         data: req.params,
@@ -100,6 +100,14 @@ class Transaction {
         .json({ data: req.body, message: 'amount must be a number' });
     }
     user.balance -= parseInt(req.body.amount);
+
+    const newTransaction = new TransactionModel({
+      transactionType: 'Withdrawal',
+      source: user.id,
+      destination: user.id,
+      amount: req.body.amount,
+    });
+
     const result = await user.save();
     return res
       .status(500)
@@ -108,7 +116,7 @@ class Transaction {
 
   async makePayment(req, res) {
     // User nay la source
-    const { srcUserId } = req.body;
+    const { source: srcUserId } = req.body;
     if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
         data: req.params,
@@ -125,7 +133,7 @@ class Transaction {
     }
 
     // User nay la destination
-    const { desUserId } = req.params;
+    const { destination: desUserId } = req.params;
     if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
         data: req.params,
@@ -152,36 +160,46 @@ class Transaction {
     desUser.balance += parseInt(req.body.amount);
     const result1 = await srcUser.save();
     const result2 = await desUser.save();
+
+    const newTransaction = new TransactionModel({
+      transactionType: 'Payment',
+      source: srcUser.id,
+      destination: desUser.id,
+      amount: transaction.amount,
+    });
+    await newTransaction.save();
+
     return res.status(400).json({
       data: { transaction: req.body, srcUser: result1, desUser: result2 },
       message: 'Transaction successfully',
     });
   }
-  // Todo: Ham ben ngoai su dung
-  async makeTransaction(req, res) {
-    const transactionDto = req.body;
-    try {
-      if (transactionDto.type === 'Deposit') {
-        return this.deposit(req, res);
-      } else if (transactionDto.type === 'Withdrawal') {
-        return this.withdrawal(req, res);
-      } else if (transactionDto.type === 'Payment') {
-        return this.makePayment(req, res);
-      } else if (transactionDto.type === 'Order') {
-        return this.order(req, res);
-      } else {
-        return res.status(500).json({
-          data: transactionDto,
-          message: 'transaction type incorrect',
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        data: transactionDto,
-        message: 'Internal error when make transaction',
-      });
-    }
-  }
+
+  // async makeTransaction(req, res) {
+  //   const transactionDto = req.body;
+  //   try {
+  //     if (transactionDto.type === 'Deposit') {
+  //       return this.deposit(req, res);
+  //     } else if (transactionDto.type === 'Withdrawal') {
+  //       return this.withdrawal(req, res);
+  //     } else if (transactionDto.type === 'Payment') {
+  //       return this.makePayment(req, res);
+  //     } else if (transactionDto.type === 'Order') {
+  //       return this.order(req, res);
+  //     } else {
+  //       return res.status(500).json({
+  //         data: transactionDto,
+  //         message: 'transaction type incorrect',
+  //       });
+  //     }
+  //   } catch (error) {
+  //     return res.status(500).json({
+  //       data: transactionDto,
+  //       message: 'Internal error when make transaction',
+  //     });
+  //   }
+  // }
+
   async getTransactionById(req, res) {
     try {
       const { transactionId } = req.params;
