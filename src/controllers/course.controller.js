@@ -10,7 +10,8 @@ const { populate } = require('../models/course.model');
 class CourseController {
   async getAllCourse(req, res) {
     try {
-      let courses = await courseModel.find({});
+      data = req.query;
+      let courses = await courseModel.find(data);
       res.status(200).send(courses);
     } catch (error) {
       res.status(500).json(error.message);
@@ -69,17 +70,35 @@ class CourseController {
 
   async getOpenCourse(req, res) {
     try {
-      const courseOpen = await courseModel
-        .find({ status: 'OPEN' })
+      const { tutorId, subject, grade, minSalary } = req.body;
+      let courseOpen = await courseModel
+        .find({
+          status: 'OPEN',
+        })
         .populate('subjects')
         .populate('grade')
         .populate('customer');
-
-      res.status(200).send(courseOpen);
-    } catch (error) {
+      courseOpen = courseOpen.filter((course) => {
+        let checkSubject = subject
+          ? course.subjects.map((s) => s._id.toString()).includes(subject)
+          : true;
+        let checkGrade = grade ? course.grade._id.toString() == grade : true;
+        let checkSalary = minSalary ? course.salary >= minSalary : true;
+        return checkSubject && checkGrade && checkSalary;
+      });
+      let tutorCourse = await tutorCourseModel.find({ tutor: tutorId });
+      tutorCourse = tutorCourse.map((ele) => ele.course);
+      let filteredCourseOpen = courseOpen.filter((course) => {
+        return !tutorCourse.includes(course._id.toString());
+      });
       res
-        .status(500)
-        .send({ data: 'error', message: 'Lỗi ở API /course/get-open-course' });
+        .status(200)
+        .json({ data: filteredCourseOpen, message: 'Get open courses' });
+    } catch (error) {
+      res.status(500).json({
+        data: req.query,
+        message: error.message,
+      });
     }
   }
   async cancelCourse(req, res) {
