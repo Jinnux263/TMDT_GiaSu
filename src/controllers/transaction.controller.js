@@ -190,7 +190,7 @@ class Transaction {
     }
 
     srcUser.balance -= parseInt(req.body.amount);
-    desUser.balance += parseInt(req.body.amount);
+    desUser.balance += parseInt(req.body.amount) * 0.9;
     const result1 = await srcUser.save();
     const result2 = await desUser.save();
 
