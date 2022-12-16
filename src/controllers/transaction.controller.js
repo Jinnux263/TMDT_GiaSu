@@ -1,6 +1,7 @@
 const UserModel = require('../models/user.model');
 const TransactionModel = require('../models/transaction.model');
 const CourseModel = require('../models/course.model');
+const TutorCourseModel = require('../models/tutor_course.model');
 const generateMoMoPayment = require('../service/Momo');
 const axios = require('axios');
 
@@ -165,8 +166,20 @@ class Transaction {
         .status(404)
         .json({ data: req.body, message: 'course not found' });
     }
+
     course.status = 'FINISH';
     await course.save();
+
+    const tutor = await TutorCourseModel.findOne({
+      course: courseId,
+    });
+    if (!tutor) {
+      return res
+        .status(404)
+        .json({ data: req.body, message: 'tutor not found' });
+    }
+    tutor.status = 'Finish';
+    await tutor.save();
 
     // Chuyen tien tu hai tai khoan toi nhau
     // Luu giao dich, cap nhat so du
@@ -175,6 +188,7 @@ class Transaction {
         .status(500)
         .json({ data: req.body, message: 'amount must be a number' });
     }
+
     srcUser.balance -= parseInt(req.body.amount);
     desUser.balance += parseInt(req.body.amount);
     const result1 = await srcUser.save();
