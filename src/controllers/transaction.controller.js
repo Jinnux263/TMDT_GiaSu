@@ -13,7 +13,7 @@ class Transaction {
   //   const { desUserId } = req.body;
   //   if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
   //     return res.status(404).json({
-  //       data: req.params,
+  //       data: req.body,
   //       message: 'there is no user with id ' + desUserId,
   //     });
   //   }
@@ -25,7 +25,7 @@ class Transaction {
   //   if (!user) {
   //     return res
   //       .status(404)
-  //       .json({ data: req.params, message: 'user not found' });
+  //       .json({ data: req.body, message: 'user not found' });
   //   }
 
   //   // Luu giao dich, cap nhat so du
@@ -46,7 +46,7 @@ class Transaction {
   //   const { desUserId } = req.body;
   //   if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
   //     return res.status(404).json({
-  //       data: req.params,
+  //       data: req.body,
   //       message: 'there is no user with id ' + desUserId,
   //     });
   //   }
@@ -58,7 +58,7 @@ class Transaction {
   //   if (!user) {
   //     return res
   //       .status(404)
-  //       .json({ data: req.params, message: 'user not found' });
+  //       .json({ data: req.body, message: 'user not found' });
   //   }
 
   //   // Luu giao dich, cap nhat so du
@@ -79,7 +79,7 @@ class Transaction {
     const { source: srcUserId } = req.body;
     if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
-        data: req.params,
+        data: req.body,
         message: 'there is no user with id ' + srcUserId,
       });
     }
@@ -90,7 +90,7 @@ class Transaction {
     if (!user) {
       return res
         .status(404)
-        .json({ data: req.params, message: 'user not found' });
+        .json({ data: req.body, message: 'user not found' });
     }
 
     // Luu giao dich, cap nhat so du
@@ -107,11 +107,11 @@ class Transaction {
       destination: user.id,
       amount: req.body.amount,
     });
-
-    const result = await user.save();
+    await newTransaction.save();
+    await user.save();
     return res
       .status(500)
-      .json({ data: result, message: 'Withdrawal successfully' });
+      .json({ data: newTransaction, message: 'Withdrawal successfully' });
   }
 
   async makePayment(req, res) {
@@ -119,7 +119,7 @@ class Transaction {
     const { source: srcUserId } = req.body;
     if (!srcUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
-        data: req.params,
+        data: req.body,
         message: 'there is no user with id ' + srcUserId,
       });
     }
@@ -129,14 +129,15 @@ class Transaction {
     if (!srcUser) {
       return res
         .status(404)
-        .json({ data: req.params, message: 'user not found' });
+        .json({ data: req.body, message: 'user not found' });
     }
 
     // User nay la destination
-    const { destination: desUserId } = req.params;
+    const { destination: desUserId } = req.body;
+    console.log(desUserId);
     if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
-        data: req.params,
+        data: req.body,
         message: 'there is no user with id ' + desUserId,
       });
     }
@@ -146,7 +147,7 @@ class Transaction {
     if (!desUser) {
       return res
         .status(404)
-        .json({ data: req.params, message: 'user not found' });
+        .json({ data: req.body, message: 'user not found' });
     }
 
     // Chuyen tien tu hai tai khoan toi nhau
@@ -165,7 +166,7 @@ class Transaction {
       transactionType: 'Payment',
       source: srcUser.id,
       destination: desUser.id,
-      amount: transaction.amount,
+      amount: req.body.amount,
     });
     await newTransaction.save();
 
