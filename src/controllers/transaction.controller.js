@@ -202,7 +202,7 @@ class Transaction {
     });
     await newTransaction.save();
 
-    return res.status(400).json({
+    return res.status(200).json({
       data: { transaction: req.body, srcUser: result1, desUser: result2 },
       message: 'Transaction successfully',
     });
