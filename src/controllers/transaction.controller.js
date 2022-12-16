@@ -1,5 +1,6 @@
 const UserModel = require('../models/user.model');
 const TransactionModel = require('../models/transaction.model');
+const CourseModel = require('../models/course.model');
 const generateMoMoPayment = require('../service/Momo');
 const axios = require('axios');
 
@@ -134,7 +135,6 @@ class Transaction {
 
     // User nay la destination
     const { destination: desUserId } = req.body;
-    console.log(desUserId);
     if (!desUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(404).json({
         data: req.body,
@@ -149,6 +149,24 @@ class Transaction {
         .status(404)
         .json({ data: req.body, message: 'user not found' });
     }
+
+    const { courseId } = req.body;
+    if (!courseId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        data: req.body,
+        message: 'there is no course with id ' + courseId,
+      });
+    }
+    const course = await CourseModel.findOne({
+      _id: courseId,
+    });
+    if (!course) {
+      return res
+        .status(404)
+        .json({ data: req.body, message: 'course not found' });
+    }
+    course.status = 'FINISH';
+    await course.save();
 
     // Chuyen tien tu hai tai khoan toi nhau
     // Luu giao dich, cap nhat so du
