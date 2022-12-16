@@ -305,16 +305,18 @@ class Transaction {
       let transactions = await TransactionModel.aggregate([
         {
           $match: {
-            // $and: [
-            //   { desination: user._id },
-            //   {
-            //     $or: [
-            //       { transactionType: 'Deposit' },
-            //       { transactionType: 'Withdrawal' },
-            //       { transactionType: 'Payment' },
-            //     ],
-            //   },
-            // ],
+            $and: [
+              {
+                $or: [{ source: user._id }, { destination: user._id }],
+              },
+              {
+                $or: [
+                  { transactionType: 'Deposit' },
+                  { transactionType: 'Withdrawal' },
+                  { transactionType: 'Payment' },
+                ],
+              },
+            ],
           },
         },
         {
