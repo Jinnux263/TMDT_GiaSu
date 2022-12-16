@@ -289,18 +289,51 @@ class Transaction {
           .json({ data: req.params, message: 'user not found' });
       }
 
-      let transactions = await TransactionModel.find({
-        $and: [
-          { desination: user._id },
-          {
-            $or: [
-              { transactionType: 'Deposit' },
-              { transactionType: 'Withdrawal' },
-              { transactionType: 'Payment' },
-            ],
+      // let transactions = await TransactionModel.find({
+      //   $and: [
+      //     { desination: user._id },
+      //     {
+      //       $or: [
+      //         { transactionType: 'Deposit' },
+      //         { transactionType: 'Withdrawal' },
+      //         { transactionType: 'Payment' },
+      //       ],
+      //     },
+      //   ],
+      // });
+
+      let transactions = await TransactionModel.aggregate([
+        {
+          $match: {
+            // $and: [
+            //   { desination: user._id },
+            //   {
+            //     $or: [
+            //       { transactionType: 'Deposit' },
+            //       { transactionType: 'Withdrawal' },
+            //       { transactionType: 'Payment' },
+            //     ],
+            //   },
+            // ],
           },
-        ],
-      });
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'source',
+            foreignField: '_id',
+            as: 'source',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'destination',
+            foreignField: '_id',
+            as: 'destination',
+          },
+        },
+      ]);
       if (!transactions) {
         return res
           .status(404)
