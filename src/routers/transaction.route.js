@@ -17,12 +17,12 @@ router.post('/bill-infor', auth, (req, res) => {
   TransactionController.getBillPaymentMethod(req, res);
 });
 
-router.get('/:transactionId', auth, TransactionController.getTransactionById);
-
 router.get(
   '/user/:userId',
   auth,
   TransactionController.getAllTransactionOfUser,
 );
+
+router.get('/:transactionId', auth, TransactionController.getTransactionById);
 
 module.exports = router;

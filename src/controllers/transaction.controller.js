@@ -239,21 +239,28 @@ class Transaction {
       }
 
       let transactions = await TransactionModel.find({
-        source: user._id,
-        desination: user._id,
-        transactionType: 'Deposit' | 'Withdrawal' | 'Payment',
+        $and: [
+          { desination: user._id },
+          {
+            $or: [
+              { transactionType: 'Deposit' },
+              { transactionType: 'Withdrawal' },
+              { transactionType: 'Payment' },
+            ],
+          },
+        ],
       });
-
       if (!transactions) {
         return res
           .status(404)
           .json({ data: req.params, message: 'transaction not found' });
       }
-      res.status(200).send(
-        transactions.map((transaction) => {
-          return transactions.populate('_id');
-        }),
-      );
+      // res.status(200).send(
+      //   transactions.map((transaction) => {
+      //     return transaction.populate('_id');
+      //   }),
+      // );
+      res.status(200).send(transactions);
     } catch (error) {
       res.status(500).json({ data: req.params, message: error.message });
     }
